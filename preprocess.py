@@ -1,26 +1,5 @@
-#############################################
-# Bioline Auto Pre-Processor
-#
-# This script performs a preprocessing of
-# xml files used on the Bioline website. It
-# performs the following tasks
-# - Sets the article id in the article tag
-# - Sets the article id in the index tag
-# - Sets the copyright to a predefined value
-# - Removes NA from keywords
-# - Removes NA from title
-# - Removes NA from abstract
-# - Automatically formats common format-requiring words
-# - Automatically formats common abstract section headers
-# - Alert the processor if certain files have year, number
-#   or volume different from correct ones, and autofix them
-#
-# Note, this does not eliminate the need to
-# manually process the abstract. Processors
-# must still check for additional formatting.
-########################################
-
 import os
+import re
 
 # Global variables
 inf_year = ""
@@ -30,46 +9,39 @@ inf_journal_code = ""
 
 ### FUNCTIONS ###
 def setArticleId(filename, line):
-	'''(str, str) -> str
-		Sets id="jjxxx" to id=${filename} in the <article> line'''
+	''' (str, str) -> str
+		Sets id="jjxxx" to id=${filename} in the <article> line
+	'''
 	# First item in lines should be the <article> tag
 	new_line = "<article id=\"" + filename[0:-4] + "\" "
 	new_line += line[line.index("lang="):]
 	return new_line
 
-def removeNATitles(line):
+def removeNA(line, tag):
 	'''(str) -> str
-		Removes n/a derivatives from the <title> line, leaving it as <title></title>'''
-	if (line.lower().endswith(">na</title>") or line.lower().endswith(">n/a</title>")):
-		return line[0:line.index(">")+1] + "</title>"
-	else:
-		return line
+		Removes n/a and its derivatives from tag specified by *tag*.
 
-def removeNAKeywords(line):
-	'''(str) -> str
-		Removes n/a derivatives from the <keyword> line, leaving it as <keyword></keyword>'''
-	if (line.lower().endswith(">na</keyword>") or line.lower().endswith(">n/a</keyword>")):
-		return line[0:line.index(">")+1] + "</keyword>"
-	else:
-		return line
-
-def removeNAAbstracts(line):
-	'''(str) -> str
-		Removes n/a derivatives from Abstracts line, leaving it as <abstract></abstract>'''
-	if (line.lower().endswith(">na</abstract>") or line.lower().endswith(">n/a</abstract>")):
-		return line[0:line.index(">")+1] + "</abstract>"
-	else:
-		return line
+		>>> removeNA("<title>NA</title>", "title")
+		"<title></title>"
+	'''
+	derivatives = ["na", "n/a", "none"]
+	for derivative in derivatives:
+		if (line.lower().endswith(">" + derivative + "</" + tag + ">")):
+			return line[0:line.index(">")+1] + "</" + tag + ">"
+	# There were no na derivatives. Return the line as is.
+	return line
 
 def setIndexId(filename, line):
 	'''(str) -> str
-		Sets the last element of the <index> tag to the filename'''
+		Sets the last element of the <index> tag to the filename (minus extension of course)
+	'''
 	return line[0:line.index("xxx<")-2] + filename[0:-4] + "</index>"
 
 def commonTextSubs(text):
 	'''(str) -> str
-		Replaces words or sequences that predominantly require the processor to manually format
-		them with their most commonly formatted version.'''
+		Replaces words or sequences in abstract that predominantly require the processor to manually format
+		them with their most commonly formatted version.
+	'''
 	substitutions = {"H2O2":"H<sub>2</sub>O<sub>2</sub>",
 					 "H2O": "H<sub>2</sub>O",
 					 "CO2": "CO<sub>2</sub>",
@@ -80,10 +52,11 @@ def commonTextSubs(text):
 					 "S. aureus": "<i>S. aureus</i>",
 					 "&lt;i&gt;": "<i>",
 					 "&lt;/i&gt;": "</i>",
-					 "L-1": "L<sup>-1</sup>",
+					 " L-1": " L<sup>-1</sup>", # leading space prevents formatting IL-1 (interleukin)
 					 "ha-1": "ha<sup>-1</sup>",
 					 "\\\'": "\'",
 					 "LC50": "LC<sub>50</sub>",
+					 "LD50": "LD<sub>50</sub>",
 					 "/m2": "/m<sup>2</sup>"}
 
 	for key in substitutions.keys():
@@ -94,12 +67,13 @@ def commonTextSubs(text):
 def surroundHeaders(text, front, special_front, back):
 	'''(str, str, str, str) -> str
 		For a header h in common_headers, it is replaced by the sequence (special_)front+header+back, thereby
-		automatically applying bold, italics, or linebreaks to the different sections within an abstract.'''
+		automatically applying bold, italics, or linebreaks to the different sections within an abstract.
+	'''
 	common_headers = ["background:", "Background:", "Background\n",
+					  "materials and methods:", "Materials and methods:",
 					  "methods:", "method:", "Methods:", "Method:", "Methods\n", "Methodology:",
 					  "result:", "results:", "Result:", "Results:", "Results\n",
 					  "conclusion:", "conclusions:", "Conclusion:", "Conclusions:", "Conclusions\n",
-					  "materials and methods:", "Materials and methods:",
 					  "Introduction:", "Introduction\n",
 					  "Objective:", "Objectives:",
 					  "Discussion:", "Discussions:",
@@ -113,6 +87,12 @@ def surroundHeaders(text, front, special_front, back):
 	return text
 
 def getAttribute(text, attribute):
+	''' (str, str) -> str
+	Returns the value of a given attribute in a line of text (where text is a valid xml tag)
+
+	>>> getAttribute('<article year="1997"></article>', 'year')
+	"1997"
+	'''
 	start = attribute + "=\""
 	if start not in text:
 		return ""
@@ -193,7 +173,18 @@ def updateIndexYear(line):
 	# Return the line put back together
 	return spaces * " " + " ".join(tokens)
 
+def fixRedundantPageNumbers(line):
+	pages = getAttribute(line, "pages")
+	if (re.match(r'(\d+)-\1', pages)):
+		line = updateAttribute("pages", pages[:pages.index("-")], line)
+	return line
+
 def fixDiscrepencies(files, directory_path, disc_type, expected):
+	''' (dict, str, str, str) ->
+	For each file in files, the incorrect attribute (disc_type) is updated
+	with the correct value (expected).
+
+	'''
 	# Loop through each file that needs fixing
 	for filename in files.keys():
 		print("... Fixing " + filename)
@@ -222,6 +213,12 @@ def fixDiscrepencies(files, directory_path, disc_type, expected):
 	print("")
 
 def extract_implicit_info(path):
+	''' (str) -> (str, str, str, str)
+	Returns the volume, number, year, and journal code for this particular
+	journal by extracting info from the directory structure and file-naming
+	conventions for Bioline tickets.
+	'''
+
 	# Filepath looks like .../.../jjVV(N)/
 	folder = path[:-5]
 	folder = folder[folder.rindex("/")+1:]
@@ -294,20 +291,29 @@ for filename in os.listdir(filepath):
 				file_to_number[filename] = getAttribute(lines[0], "number")
 				file_to_year[filename] = getAttribute(lines[0], "year")
 
+				# Fix redundant page numbers if possible
+				lines[0] = fixRedundantPageNumbers(lines[0])
+
+			# Replace NA if applicable (in title, keyword, or abstract tags)
+			#possible_NAs = ["title", "keyword", "abstract"]
+			#for option in possible_NAs:
+		#		if lines[i].strip().startswith("<" + option):
+		#			lines[i] = removeNA(lines[i], option)
+			
 			# Replace NA titles if applicable
 			if lines[i].strip().startswith("<title"):
-				lines[i] = removeNATitles(lines[i])
+				lines[i] = removeNA(lines[i], "title")
 
 			# Replace NA keywords if applicable
 			elif lines[i].strip().startswith("<keyword"):
-				lines[i] = removeNAKeywords(lines[i])
+				lines[i] = removeNA(lines[i], "keyword")
 
 			# Replace NA abstracts if applicable
-			elif lines[i].strip().startswith("<abstract") and lines[i].strip().endswith("</abstract>"):
-				lines[i] = removeNAAbstracts(lines[i])
+			elif lines[i].strip().startswith("<abstract"):
+				lines[i] = removeNA(lines[i], "abstract")
 
 			# Replace copyright if applicable
-			elif lines[i].strip().startswith("<copyright") and lines[i].strip().endswith("</copyright>"):
+			if lines[i].strip().startswith("<copyright") and lines[i].strip().endswith("</copyright>"):
 				if (copyright != "default"):
 					lines[i] = "<copyright>" + copyright + "</copyright>"
 				else:
@@ -316,7 +322,7 @@ for filename in os.listdir(filepath):
 			# Remove superfluous commas from keywords if applicable
 			elif lines[i].strip().startswith("<keyword") and lines[i].strip().endswith("</keyword>"):
 				lines[i] = lines[i].replace(",;", ";")
-				lines[i] = lines[i].replace(",<" ",")
+				lines[i] = lines[i].replace(",<", ",")
 
 			# Replace the id in the index tag with the appropriate value
 			elif lines[i].strip().startswith("<index>") and lines[i].strip().endswith("</index>"):

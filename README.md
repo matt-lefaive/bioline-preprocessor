@@ -9,7 +9,7 @@ Upon running the script, the following actions will be performed to each XML fil
 * Formatting (italics, subscript, etc.) will be applied to words commonly formatted
 * Abstract section headings (Background, Methods, etc.) will be automatically formatted
 * `year`, `number`, and `volume` fields will automatically be fixed if they contain the incorrect value for this issue
-* Redundant page numberings (e.g. "1-1") will be shortened (e.g. "1") 
+* Redundant page numberings will be shortened (e.g. "1-1" becomes "1") 
 
 ## Usage
 1. Run bioline-preprocessor.py
@@ -18,11 +18,13 @@ Upon running the script, the following actions will be performed to each XML fil
 
 ### Notes
 The files for all assigned Bioline tickets as downloaded by the Bioline employees have the same directory structure:  
+```
 .../JJV(N)  
 	├ pdf  
 	│  ├ #####.pdf  
 	│  └ ...  
 	└ xml  
 	   ├ #####.xml  
-	   └ ...  
+	   └ ...
+```  
 Furthermore, all XML files follow one default template. Successful operation of this program requires a directory structure as specified above and that all xml files in .../JJV(N)/xml follow the proprietary Bioline xml format.
