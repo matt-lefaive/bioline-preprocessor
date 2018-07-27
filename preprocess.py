@@ -1,5 +1,6 @@
 import os
 import re
+from species_link import insertSpeciesLinks
 
 # Global variables
 inf_year = ""
@@ -64,9 +65,6 @@ def commonTextSubs(text):
 					 "NO2-": "NO<sub>2</sub><sup>-</sup>",
 					 "NO2": "NO<sub>2</sub>",
 					 "NH4+": "NH<sub>4</sub><sup>+</sup>",
-					 "E. coli": "<i>E. coli</i>",
-					 "E.coli": "<i>E.coli</i>",
-					 "S. aureus": "<i>S. aureus</i>",
 					 "&lt;i&gt;": "<i>",
 					 "&lt;/i&gt;": "</i>",
 					 " L-1": " L<sup>-1</sup>", # leading space prevents formatting IL-1 (interleukin)
@@ -275,6 +273,7 @@ textSubs      = input("Autoformat common words? (y/n): ").lower()
 addNewLine    = input("Add newlines before results, method, conclusions, etc.? (y/n): ").lower()
 boldHeaders   = input("Make background, methods, results, etc. bold? (y/n): ").lower()
 italicHeaders = "n" if boldHeaders.lower() == "y" else input("Make background, methods, results, etc. italicized? (y/n): ").lower()
+speciesLinks  = input("Automatically attempt to insert species links? (y/n): ").lower()
 
 # Define dictionaries to search for discrepancies
 file_to_volume = dict()
@@ -368,6 +367,10 @@ for filename in os.listdir(filepath):
 				body = surroundHeaders(body, "<b>", "<b>", "</b>")
 			elif (italicHeaders == "y"):
 				body = surroundHeaders(body, "<i>", "<i>", "</i>")
+
+		# Add species links if the user requested it
+		if speciesLinks:
+			body = insertSpeciesLinks(body)
 
 		# Write processed lines back to the file
 		f = open(filepath + filename, "w")

@@ -1,15 +1,16 @@
 # Bioline Preprocessor
-The Bioline Preprocessor performs a preprocessing of XML files used to display information on the [Bioline International website](http://www.bioline.org.br/)
+The Bioline Preprocessor performs a preprocessing of XML files used to display information at [Bioline International](http://www.bioline.org.br/).
 
 ## Actions Performed
-Upon running the script, the following actions will be performed to each XML file in directory specified by the user:
+Upon running the script, the following actions will be performed to each XML file in the directory specified by the user:
 * Article id will be correctly set in `article` and `index` tags
 * Copyright will be filled in with user-specified value (or the default copyright for the journal being processed)
 * "NA" and its derivatives will be removed from tags in which they are the only element
 * Formatting (italics, subscript, etc.) will be applied to words commonly formatted
 * Abstract section headings (Background, Methods, etc.) will be automatically formatted
 * `year`, `number`, and `volume` fields will automatically be fixed if they contain the incorrect value for this issue
-* Redundant page numberings will be shortened (e.g. "1-1" becomes "1") 
+* Redundant page numberings will be shortened (e.g. "1-1" becomes "1")
+* Automatically adds species links for common species (and italicizes subsequent occurrences)
 
 ## Usage
 1. Run preprocessor.py
