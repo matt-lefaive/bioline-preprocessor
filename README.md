@@ -12,7 +12,7 @@ Upon running the script, the following actions will be performed to each XML fil
 * Redundant page numberings will be shortened (e.g. "1-1" becomes "1") 
 
 ## Usage
-1. Run bioline-preprocessor.py
+1. Run preprocessor.py
 2. When prompted, enter the path to the XML folder for this issue
 3. Follow on-screen prompts to fill in any required information for processing
 

@@ -237,15 +237,16 @@ def extract_implicit_info(path):
 
 
 ### MAIN CODE ###
-# Get the file path of the /xml folder
+# Get the file path of the /xml folder and appropriately format it
 filepath = input("Enter path to xml folder to process: ")
-if not "/" in filepath:
-	if not filepath.endswith("\\"):
-		filepath = filepath + "\\"
-	filepath = filepath.replace("\\", "/")
-else:
-	if not filepath.endswith("/"):
-		filepath = filepath + "/"
+filepath = filepath.replace("\\", "/")
+if not filepath.endswith("/"):
+	filepath += "/"
+
+# Make sure path meets the pattern: .../jjv(n)/xml/
+if not re.match(r'.*\/[a-z]{2}\d+\(\d+\)\/xml\/$', filepath):
+	print("Error in filepath. Filepath should look like C:/.../jjvv(n)/xml")
+	exit()
 
 # Get various other parameters about what to change
 copyright = input("Enter the journal copyright (or 'default' to leave it as is): ")
@@ -273,6 +274,8 @@ for filename in os.listdir(filepath):
 			lines = f.read().splitlines()
 			f.close()
 
+		# NB: LINE 0 IS ALWAYS THE <abstract> LINE IN A BIOLINE XML!
+
 		# Check if this file as already been processed
 		if not lines[0].strip().startswith("<article id=\"" + filename[0:2] + "xxx\""):
 			print("... Already processed " + filename)
@@ -282,23 +285,16 @@ for filename in os.listdir(filepath):
 		print("... Processing " + filename)
 		lines[0] = setArticleId(filename, lines[0])
 
+		# Fix redundant page numbers if possible
+		lines[0] = fixRedundantPageNumbers(lines[0])
+
+		# Add elements to our discrepancy dictionaries
+		file_to_volume[filename] = getAttribute(lines[0], "volume")
+		file_to_number[filename] = getAttribute(lines[0], "number")
+		file_to_year[filename] = getAttribute(lines[0], "year")
+
 		# Loop through remaining lines and replace values as appropriate
 		for i in range(len(lines)):
-
-			# Start adding elements to our discrepancy dictionaries
-			if lines[i].strip().startswith("<article"):
-				file_to_volume[filename] = getAttribute(lines[0], "volume")
-				file_to_number[filename] = getAttribute(lines[0], "number")
-				file_to_year[filename] = getAttribute(lines[0], "year")
-
-				# Fix redundant page numbers if possible
-				lines[0] = fixRedundantPageNumbers(lines[0])
-
-			# Replace NA if applicable (in title, keyword, or abstract tags)
-			#possible_NAs = ["title", "keyword", "abstract"]
-			#for option in possible_NAs:
-		#		if lines[i].strip().startswith("<" + option):
-		#			lines[i] = removeNA(lines[i], option)
 			
 			# Replace NA titles if applicable
 			if lines[i].strip().startswith("<title"):
