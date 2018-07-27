@@ -10,19 +10,19 @@ inf_journal_code = ""
 ### FUNCTIONS ###
 def setArticleId(filename, line):
 	''' (str, str) -> str
-		Sets id="jjxxx" to id=${filename} in the <article> line
+	Sets id="jjxxx" to id=${filename} in the <article> line
 	'''
-	# First item in lines should be the <article> tag
+	# First item in lines is always the <article> tag
 	new_line = "<article id=\"" + filename[0:-4] + "\" "
 	new_line += line[line.index("lang="):]
 	return new_line
 
 def removeNA(line, tag):
 	'''(str) -> str
-		Removes n/a and its derivatives from tag specified by *tag*.
+	Removes n/a and its derivatives from tag specified by *tag*.
 
-		>>> removeNA("<title>NA</title>", "title")
-		"<title></title>"
+	>>> removeNA("<title>NA</title>", "title")
+	"<title></title>"
 	'''
 	derivatives = ["na", "n/a", "none"]
 	for derivative in derivatives:
@@ -31,22 +31,39 @@ def removeNA(line, tag):
 	# There were no na derivatives. Return the line as is.
 	return line
 
+def removeNAAuthors(lines):
+	''' ([str,]) -> None
+	Removes NA from any of the <author> and <authors> tags if applicable.
+	Mutates the list of lines passed in.
+	'''
+	# <author> tag is always line 2. 
+	if re.match(r'\s*\<author seq=\"1\"\>((n\/?a)|none)\<\/author\>', lines[1], re.IGNORECASE) and \
+	   re.match(r'\s*\<authors seq=\"1\"\>', lines[2]):
+	    # Replace line 2 with empty tag if NA was supplied as author's name
+		lines[1] = "  <author seq=\"1\"></author>"
+		
+		# Replace line 4 with empty last name tag
+		lines[3] = "    <lastname/>"
+
 def setIndexId(filename, line):
 	'''(str) -> str
-		Sets the last element of the <index> tag to the filename (minus extension of course)
+	Sets the last element of the <index> tag to the filename (minus extension of course)
 	'''
 	return line[0:line.index("xxx<")-2] + filename[0:-4] + "</index>"
 
 def commonTextSubs(text):
 	'''(str) -> str
-		Replaces words or sequences in abstract that predominantly require the processor to manually format
-		them with their most commonly formatted version.
+	Replaces words or sequences in abstract that predominantly require the processor to manually format
+	them with their most commonly formatted version.
 	'''
 	substitutions = {"H2O2":"H<sub>2</sub>O<sub>2</sub>",
 					 "H2O": "H<sub>2</sub>O",
 					 "CO2": "CO<sub>2</sub>",
 					 "NO3-": "NO<sub>3</sub><sup>-</sup>",
 					 "NO3": "NO<sub>3</sub>",
+					 "NO2-": "NO<sub>2</sub><sup>-</sup>",
+					 "NO2": "NO<sub>2</sub>",
+					 "NH4+": "NH<sub>4</sub><sup>+</sup>",
 					 "E. coli": "<i>E. coli</i>",
 					 "E.coli": "<i>E.coli</i>",
 					 "S. aureus": "<i>S. aureus</i>",
@@ -66,8 +83,8 @@ def commonTextSubs(text):
 
 def surroundHeaders(text, front, special_front, back):
 	'''(str, str, str, str) -> str
-		For a header h in common_headers, it is replaced by the sequence (special_)front+header+back, thereby
-		automatically applying bold, italics, or linebreaks to the different sections within an abstract.
+	For a header h in common_headers, it is replaced by the sequence (special_)front+header+back, thereby
+	automatically applying bold, italics, or linebreaks to the different sections within an abstract.
 	'''
 	common_headers = ["background:", "Background:", "Background\n",
 					  "materials and methods:", "Materials and methods:",
@@ -100,6 +117,10 @@ def getAttribute(text, attribute):
 	return text[:text.index("\"")]
 
 def existsDiscrepencies(d, expected):
+	''' (dict {str:str}, str) -> bool
+	Returns true if any of the files (keys of d) maps to a value other than expected.
+	Returns false otherwise.
+	'''
 	for key in d.keys():
 		if d[key] != expected:
 			return True
@@ -249,16 +270,16 @@ if not re.match(r'.*\/[a-z]{2}\d+\(\d+\)\/xml\/$', filepath):
 	exit()
 
 # Get various other parameters about what to change
-copyright = input("Enter the journal copyright (or 'default' to leave it as is): ")
-textSubs = input("Autoformat common words? (y/n): ").lower()
-addNewLine = input("Add newlines before results, method, conclusions, etc.? (y/n): ").lower()
-boldHeaders = input("Make background, methods, results, etc. bold? (y/n): ").lower()
+copyright     = input("Enter the journal copyright (or 'default' to leave it as is): ")
+textSubs      = input("Autoformat common words? (y/n): ").lower()
+addNewLine    = input("Add newlines before results, method, conclusions, etc.? (y/n): ").lower()
+boldHeaders   = input("Make background, methods, results, etc. bold? (y/n): ").lower()
 italicHeaders = "n" if boldHeaders.lower() == "y" else input("Make background, methods, results, etc. italicized? (y/n): ").lower()
 
 # Define dictionaries to search for discrepancies
 file_to_volume = dict()
 file_to_number = dict()
-file_to_year = dict()
+file_to_year   = dict()
 
 # Implicitly determine year, issue, and number
 (inf_volume, inf_number, inf_year, inf_journal_code) = extract_implicit_info(filepath)
@@ -292,6 +313,9 @@ for filename in os.listdir(filepath):
 		file_to_volume[filename] = getAttribute(lines[0], "volume")
 		file_to_number[filename] = getAttribute(lines[0], "number")
 		file_to_year[filename] = getAttribute(lines[0], "year")
+
+		# Remove NA from authors if applicable
+		removeNAAuthors(lines)
 
 		# Loop through remaining lines and replace values as appropriate
 		for i in range(len(lines)):
@@ -353,20 +377,22 @@ for filename in os.listdir(filepath):
 print("Done preprocessing!")
 print("\n... Performing Discrepancy Analysis\n")
 
+# Fix any problems with volume numbers (if so desired by user)
 if existsDiscrepencies(file_to_volume, inf_volume):
 	problems = printDiscrepancyReport(file_to_volume, "volume")
 	if input("Would you like to automatically fix these problems? (y/n): ").lower() == "y":
 		fixDiscrepencies(problems, filepath, "volume", inf_volume)
 
+# Fix any problems with issue numbers (if so desired by user)
 if existsDiscrepencies(file_to_number, inf_number):
 	problems = printDiscrepancyReport(file_to_number, "number")
 	if input("Would you like to automatically fix these problems? (y/n): ").lower() == "y":
 		fixDiscrepencies(problems, filepath, "number", inf_number)
 
+# Fix any problems with published year (if so desired by user)
 if existsDiscrepencies(file_to_year, inf_year):
 	problems = printDiscrepancyReport(file_to_year, "year")
 	if input("Would you like to automatically fix these problems? (y/n): ").lower() == "y":
 		fixDiscrepencies(problems, filepath, "year", inf_year)
 
 print("Discrepancies resolved!\nPlease proceed to manual processing of each file.")
-input()
