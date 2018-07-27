@@ -152,15 +152,3 @@ def is_parenthetical(s):
 		return False
 	else:
 		return s[0] == "(" and s[-1] == ")"
-
-
-
-
-
-
-
-if __name__ == "__main__":
-	# Read in the file we are testing with
-	f = open("C:/Users/Mathew Lefaive/Desktop/rc48(3)/xml/rc17001.xml")
-	insertSpeciesLinks(f.read())
-	f.close()
