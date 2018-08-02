@@ -1,8 +1,73 @@
 Aloe barbadensis
-Amaranthus Spinosus
+Amaranthus spinosus
+Aspergillus niger
+Atelerix albiventris
+Bacillus coagulans
+Bacillus macerans
+Balanites aegyptiaca
+Bambusa Vulgaris
+Callinectes amnicola
+Callosobruchus maculatus
+Cardiosoma armatum
+Carica Papaya
+Chromolaena odorata
+Clarias gariepinus
+Clivia nobilis
+Colocasia Esculenta
+Enterobacter aerogenes
 Escherichia coli
-Hymenocarida Acida
+Fasciola hepatica 
+Hymenocarida acida
+Jatropha curcas
+Klebsiella aerogenes
+Klebsiella oxytoca
+Klebsiella pneumoniae
+Lasius niger
+Lymnea natalensis
+Maesobotyra barteri
+Manihot Esculenta
+Micrococcus luteus
+Monodora Myrstica
+Musanga cercropioides
+Musca domestica
+Oesophagostomum columbianum
+Oreochromis niloticus
 Pachymelania aurita
+Praomys tullbergi
+Pseudomonas alcaligenes
+Pseudomonas putida
+Saccharomyces cerevisiae
+Scirpus validus
 Solanum aethiopicum
 Solanum macrocarpon
-Talinum Triangulare
+Spilanthes oleracea
+Staphylococcus aureus
+Streptococcus mutans
+Streptomyces albus
+Talinum triangulare
+Telfairia occidentalis
+Theobroma cacao
+Tilapia guineensis
+Tridax Procumbens
+Vigna unguiculata
+Vitex grandifolia
+Zea mays
+--------------------------------
+Acetobacter
+Anopheles
+Arthrobacter
+Aspergillus
+Bacillus
+Bambusa
+Cephalosporium
+Culex
+Klebsiella
+Lactobacillus
+Micrococcus
+Nitrosomonas
+Pencillium
+Proteus
+Pseudomonas
+Staphylcoccus
+Streptococcus
+Tridax
