@@ -125,9 +125,7 @@ def existsDiscrepencies(d, expected):
 	return False
 
 def printDiscrepancyReport(d, disc_type):
-	print("---------------------------------------")
 	print("Journal " + disc_type + " discrepancies:")
-	print("---------------------------------------")
 	proper_values = {"number":inf_number, "year":inf_year, "volume":inf_volume}
 	expected = proper_values[disc_type]
 
@@ -231,6 +229,16 @@ def fixDiscrepencies(files, directory_path, disc_type, expected):
 		f.close()
 	print("")
 
+def write_problems_file(path, files):
+	file_body = "Proofed by: \n\n"
+	for file in files.keys():
+		file_body += file[:len(file)-4] + ":\n\n"
+
+	f = open(path, 'w')
+	f.write(file_body)
+	f.close()
+
+
 def extract_implicit_info(path):
 	''' (str) -> (str, str, str, str)
 	Returns the volume, number, year, and journal code for this particular
@@ -283,7 +291,7 @@ file_to_year   = dict()
 # Implicitly determine year, issue, and number
 (inf_volume, inf_number, inf_year, inf_journal_code) = extract_implicit_info(filepath)
 
-print("\n------------------------\nPerforming preprocessing\n------------------------")
+print("\nPerforming preprocessing\n------------------------")
 # Loop through each xml file in the directory
 for filename in os.listdir(filepath):
 	if filename.endswith(".xml"):
@@ -377,8 +385,12 @@ for filename in os.listdir(filepath):
 		f.write(body)
 		f.close()
 
-print("Done preprocessing!")
-print("\n... Performing Discrepancy Analysis\n")
+print("Done preprocessing!\n")
+print("Generating proofing file\n------------------------")
+write_problems_file(filepath + "../Problems.txt", file_to_volume)
+print("Proofing file generated!\n")
+
+print("Performing Discrepancy Analysis\n------------------------")
 
 # Fix any problems with volume numbers (if so desired by user)
 if existsDiscrepencies(file_to_volume, inf_volume):
