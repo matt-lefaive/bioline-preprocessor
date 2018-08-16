@@ -3,6 +3,7 @@ def insertSpeciesLinks(text):
 	# l
 	linked_species = []
 	short_forms = []
+	genuses = []
 
 	# Read in common species
 	f = open("./common_species.txt")
@@ -13,9 +14,6 @@ def insertSpeciesLinks(text):
 	pre_title = text[:text.index("<title")]
 	body = text[text.index("<title"):text.index("<keyword")]
 	post_abstract = text[text.index("<keyword"):]
-
-	# n
-	new_body = ""
 
 	# Check the body for each individual species in common_species.txt
 	for species in species_list:
@@ -33,14 +31,18 @@ def insertSpeciesLinks(text):
 				# If first occurrence of species, add a link
 				if species not in linked_species:
 					insert = getSpeciesLink(species)
-					linked_species += [species]
+					linked_species += [species, species.split(" ")[0]]
 
 					# Add shortened genus form to list of short forms
 					addShortForms(short_forms, species)
 
-				# Not first occurrence, italicize
+
+				# Not first occurrence, italicize if not in a species link tag
 				else:
-					insert = "<i>" + species + "</i>"
+					if not in_sp_tag(body, index):
+						insert = "<i>" + species + "</i>"
+					else:
+						insert = species
 
 				# Insert either a species link or italicized species name
 				index = index + len(insert)
@@ -54,7 +56,13 @@ def insertSpeciesLinks(text):
 	return pre_title + body + post_abstract
 					
 
-
+def in_sp_tag(body, index):
+	if (body[:index].endswith("<sp>")):
+		return True
+	elif (body[:index].endswith("genus=\"")):
+		return True
+	else:
+		return False
 
 def alreadyLinked(linked_species, species):
 	for l in linked_species:
@@ -152,3 +160,8 @@ def is_parenthetical(s):
 		return False
 	else:
 		return s[0] == "(" and s[-1] == ")"
+
+
+if __name__ == "__main__":
+	f = open("C:/Users/Mathew Lefaive/Desktop/rc48(3)/xml/rc17001.xml")
+	print(insertSpeciesLinks(f.read()))
