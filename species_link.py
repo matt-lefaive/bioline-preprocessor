@@ -1,59 +1,72 @@
+import re
+
 
 def insertSpeciesLinks(text):
-	# l
-	linked_species = []
-	short_forms = []
-	genuses = []
-
 	# Read in common species
 	f = open("./common_species.txt")
 	species_list = f.read().splitlines()
 	f.close()
 
-	# Split text as we are only considering the title and abstract (body)
+	# Split text as we are only considering the first title to last abstract (main_body)
 	pre_title = text[:text.index("<title")]
-	body = text[text.index("<title"):text.index("<keyword")]
-	post_abstract = text[text.index("<keyword"):]
+	main_body = text[text.index("<title"):text.rindex("<keyword")]
+	post_abstract = text[text.rindex("<keyword"):]
 
-	# Check the body for each individual species in common_species.txt
-	for species in species_list:
-		index = 0
-		while index != -1:
-			try:
-				index = body[index:].index(species) + index
-			except ValueError:
-				index = -1
-			else:
-				# Index was found
-				front_body = body[:index]
-				end_body = body[index + len(species):]
+	# Get indices for each different language body stuff (title-/abstract for each language)
+	start_title_indices = [m.start() for m in re.finditer("<title", main_body)]
+	end_abstract_indices = [m.start() for m in re.finditer("</abstract>", main_body)]
 
-				# If first occurrence of species, add a link
-				if species not in linked_species:
-					insert = getSpeciesLink(species)
-					linked_species += [species, species.split(" ")[0]]
+	# Move backwards from last language 
+	for j in range(len(start_title_indices) - 1, -1, -1):
+		# Clear lists cuz we're starting a new language
+		linked_species = []
+		short_forms = []
 
-					# Add shortened genus form to list of short forms
-					addShortForms(short_forms, species)
+		# Chunk out the portion of the body we want to work on
+		body = main_body[start_title_indices[j]:end_abstract_indices[j]]
+
+		# Check the body for each individual species in common_species.txt
+		for species in species_list:
+			index = 0
+			while index != -1:
+				try:
+					index = body[index:].index(species) + index
+				except ValueError:
+					index = -1
+				else: # Index was found
+					front_body = body[:index]
+					end_body = body[index + len(species):]
+
+					# If first occurrence of species add a link
+					if species not in linked_species:
+						insert = getSpeciesLink(species)
+						linked_species += [species, species.split(" ")[0]]
+
+						# Add shortened genus form to list of short forms
+						addShortForms(short_forms, species)
 
 
-				# Not first occurrence, italicize if not in a species link tag
-				else:
-					if not in_sp_tag(body, index):
-						insert = "<i>" + species + "</i>"
+					# Not first occurrence, italicize if not in a species link tag
 					else:
-						insert = species
+						if not in_sp_tag(body, index):
+							insert = "<i>" + species + "</i>"
+						else:
+							insert = species
 
-				# Insert either a species link or italicized species name
-				index = index + len(insert)
-				body = front_body + insert + end_body
+					# Insert either a species link or italicized species name
+					index = index + len(insert)
+					body = front_body + insert + end_body
 
-	# Go through body once more and italicize short forms for linked species
-	for sf in short_forms:
-		body = body.replace(sf, "<i>" + sf + "</i>")
+		# Go through body once more and italicize short forms for linked species
+		for sf in short_forms:
+			body = body.replace(sf, "<i>" + sf + "</i>")
 	
+		# Rejoin body to end of main_body
+		main_body = main_body[:start_title_indices[j]] + body + main_body[end_abstract_indices[j]:]
+
+
 	# Rejoin all three parts of the article
-	return pre_title + body + post_abstract
+	return pre_title + main_body + post_abstract
 					
 
 def in_sp_tag(body, index):
@@ -160,8 +173,3 @@ def is_parenthetical(s):
 		return False
 	else:
 		return s[0] == "(" and s[-1] == ")"
-
-
-if __name__ == "__main__":
-	f = open("C:/Users/Mathew Lefaive/Desktop/rc48(3)/xml/rc17001.xml")
-	print(insertSpeciesLinks(f.read()))
