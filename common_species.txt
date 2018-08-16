@@ -1,60 +1,97 @@
+Brassica oleracea var capitata
+-------------------------------
+Adansonia digitata
 Aloe barbadensis
 Amaranthus spinosus
+Arachis hypogaea
+Arundo donax
+Aspergillus flavus
 Aspergillus niger
+Aspergillus parasiticus
 Atelerix albiventris
 Bacillus coagulans
 Bacillus macerans
 Balanites aegyptiaca
-Bambusa Vulgaris
+Bambusa vulgaris
+Cajanus cajan
 Callinectes amnicola
 Callosobruchus maculatus
 Cardiosoma armatum
-Carica Papaya
+Carica papaya
 Chromolaena odorata
 Clarias gariepinus
+Cleome gynandra
 Clivia nobilis
-Colocasia Esculenta
+Colocasia esculenta
+Corchorus olitorius
+Cucurbita maxima
+Cynoglossus semilaevis
+Digitaria exilis
 Enterobacter aerogenes
+Erythrococca bongensis
 Escherichia coli
-Fasciola hepatica 
+Fasciola hepatica
+Grewia trichocarpa
+Hibiscus canabinum
+Hibiscus sabdariffa
 Hymenocarida acida
+Ipomoea batatas
 Jatropha curcas
 Klebsiella aerogenes
 Klebsiella oxytoca
 Klebsiella pneumoniae
+Lactuca sativa
 Lasius niger
+Leptadenia hastata
+Lupinus hispanicus
+Lupinus luteus
+Lupinus mutabilis
 Lymnea natalensis
 Maesobotyra barteri
 Manihot Esculenta
 Micrococcus luteus
 Monodora Myrstica
+Moringa oleifera
 Musanga cercropioides
 Musca domestica
+Nymphaea lotus
 Oesophagostomum columbianum
+Opuntia ficus-indica
 Oreochromis niloticus
+Oxygonum sinuatum
 Pachymelania aurita
+Phaseolus acutifolias
+Pleurotus ostreatus
 Praomys tullbergi
 Pseudomonas alcaligenes
 Pseudomonas putida
 Saccharomyces cerevisiae
+Schizosaccharomyces pombe
 Scirpus validus
+Sclerocarya birrea
 Solanum aethiopicum
 Solanum macrocarpon
+Solanum nigrum
 Spilanthes oleracea
 Staphylococcus aureus
 Streptococcus mutans
 Streptomyces albus
+Talinum portulacifolium
 Talinum triangulare
 Telfairia occidentalis
 Theobroma cacao
 Tilapia guineensis
+Trichoderma reesei
 Tridax Procumbens
+Vernonia calvoana
+Vigna subterranea
 Vigna unguiculata
 Vitex grandifolia
 Zea mays
 --------------------------------
 Acetobacter
 Anopheles
+Arabidopsis
 Arthrobacter
 Aspergillus
 Bacillus
@@ -65,9 +102,13 @@ Klebsiella
 Lactobacillus
 Micrococcus
 Nitrosomonas
+Paracoccus
 Pencillium
+Phalaenopsis
 Proteus
 Pseudomonas
+Salmonella
 Staphylcoccus
 Streptococcus
 Tridax
+Vibrio
