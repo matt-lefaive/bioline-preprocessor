@@ -1,45 +1,88 @@
 Brassica oleracea var capitata
+Rhus succedanea var. himalaica
 -------------------------------
+Acacia baileyana
+Acacia dealbata
+Acacia melanoxylon
 Adansonia digitata
 Aloe barbadensis
+Ailanthus excelsa
 Amaranthus spinosus
+Antiaris africana
+Aphania senegalensis
 Arachis hypogaea
+Aristolochia bracteolata
+Artemisia monosperma
 Arundo donax
 Aspergillus flavus
+Aspergillus fumigatus
 Aspergillus niger
 Aspergillus parasiticus
+Aster tataricus
+Astragalus membranaceus
 Atelerix albiventris
+Bacillus cereus
 Bacillus coagulans
 Bacillus macerans
 Balanites aegyptiaca
 Bambusa vulgaris
+Bombax ceiba
+Borago officinalis
+Bursera aptera
 Cajanus cajan
 Callinectes amnicola
 Callosobruchus maculatus
+Calotropis procera
+Camellia sinensis
+Candida albicans
+Candida parapsilosis
 Cardiosoma armatum
 Carica papaya
+Caylusea hexagyna
+Centaurea aegyptiaca
 Chromolaena odorata
+Citrus limonum
 Clarias gariepinus
 Cleome gynandra
 Clivia nobilis
 Colocasia esculenta
+Combretum collinum
 Corchorus olitorius
+Coriandrum sativum
+Cryptococcus neoformans
 Cucurbita maxima
 Cynoglossus semilaevis
+Cyperus esculentus
 Digitaria exilis
+Diospyros chamaethamnus
+Echinops kebericho
+Elephantorrhiza elephantina
+Entamoeba histolytica
 Enterobacter aerogenes
+Enterococcus faecalis
+Ephedra alata
 Erythrococca bongensis
 Escherichia coli
+Eucalyptus nicholii
 Fasciola hepatica
+Glycyrrhiza glabra
 Grewia trichocarpa
+Guibourtia coleosperma
+Helicobacter pylori
+Heliotropium dasycarpum
 Hibiscus canabinum
 Hibiscus sabdariffa
+Holarrhena floribunda
 Hymenocarida acida
 Ipomoea batatas
+Iris germanica
 Jatropha curcas
+Kirkia acuminata
 Klebsiella aerogenes
+Klebsiella ornithinolytica
 Klebsiella oxytoca
 Klebsiella pneumoniae
+Klebsiella terrigena
 Lactuca sativa
 Lasius niger
 Leptadenia hastata
@@ -47,48 +90,81 @@ Lupinus hispanicus
 Lupinus luteus
 Lupinus mutabilis
 Lymnea natalensis
+Lysimachia vulgaris
+Macrophomina phaseolina
 Maesobotyra barteri
+Mammea siamensis
+Mannheimia haemolytica
 Manihot Esculenta
 Micrococcus luteus
+Moltkia aurea
 Monodora Myrstica
 Moringa oleifera
+Moringa peregrina
 Musanga cercropioides
 Musca domestica
+Mycobacterium tuberculosis
+Mycoplasma bovis
+Nigella sativa
 Nymphaea lotus
 Oesophagostomum columbianum
 Opuntia ficus-indica
 Oreochromis niloticus
 Oxygonum sinuatum
 Pachymelania aurita
+Pentanisia prunelloides
 Phaseolus acutifolias
 Pleurotus ostreatus
 Praomys tullbergi
 Pseudomonas alcaligenes
 Pseudomonas putida
+Rattus norvegicus
+Rhantarium epapposum
+Rhazya stricta
+Rhus succedanea
+Rosa canina
+Rumex vesicarus
+Ruta chalepensis
 Saccharomyces cerevisiae
+Salmonella typhi
 Schizosaccharomyces pombe
+Schotia brachypetala
 Scirpus validus
 Sclerocarya birrea
+Senna didymobotrya
 Solanum aethiopicum
 Solanum macrocarpon
 Solanum nigrum
 Spilanthes oleracea
 Staphylococcus aureus
+Staphylococcus epidermidis
 Streptococcus mutans
+Streptococcus pyogenes
 Streptomyces albus
+Strychnos spinosa
 Talinum portulacifolium
 Talinum triangulare
 Telfairia occidentalis
+Terminalia chebula
+Teucrium oliverianum
 Theobroma cacao
 Tilapia guineensis
 Trichoderma reesei
+Trichophyton tonsurans
 Tridax Procumbens
+Tripterygium wilfordii
 Vernonia calvoana
+Vibrio cholerae
+Vigna radiata
 Vigna subterranea
 Vigna unguiculata
 Vitex grandifolia
 Zea mays
+Zilla spinosa
+Zingiber officinale
+Ziziphus nummularia
 --------------------------------
+Acacia
 Acetobacter
 Anopheles
 Arabidopsis
@@ -96,10 +172,18 @@ Arthrobacter
 Aspergillus
 Bacillus
 Bambusa
+Campylobacter
 Cephalosporium
+Chaetomium
+Cladosporium
+Crawfurdia
 Culex
+Curvularia
+Echium
+Eucalyptus
 Klebsiella
 Lactobacillus
+Mentha
 Micrococcus
 Nitrosomonas
 Paracoccus
@@ -107,8 +191,12 @@ Pencillium
 Phalaenopsis
 Proteus
 Pseudomonas
+Rhus
 Salmonella
+Shigella
 Staphylcoccus
+Stevia
 Streptococcus
 Tridax
 Vibrio
+Yersinia
