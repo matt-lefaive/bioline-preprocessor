@@ -1,6 +1,6 @@
 import re
 
-### This will only be successful if being run as a sublime plugin 
+### Allows species links to be added to highlighted text (as a Sublime Text plugin)
 try:
 	import sublime
 	import sublime_plugin
@@ -10,8 +10,12 @@ try:
 			view = self.view
 			for region in view.sel():
 				if not region.empty():
-					link = getSpeciesLink(view.substr(region))
-					view.replace(edit, region, link)
+					# If a species link was highlighted, revert it to it's non-linked form
+					if is_species_link(view.substr(region)):
+						view.replace(edit, region, remove_species_link(view.substr(region)))
+					else:
+						link = getSpeciesLink(view.substr(region))
+						view.replace(edit, region, link)
 except ImportError:
 	pass
 except NameError:
@@ -100,6 +104,16 @@ def in_sp_tag(body, index):
 
 def is_italicized(body, index):
 	return body[:index].endswith("<i>")
+
+def is_species_link(text):
+	return re.match(r'^<taxon genus=".*" species=".*" subprefix=".*" subspecies=".*">.*<\/taxon>$', text)
+
+def remove_species_link(text):
+	text = re.sub(r'<taxon genus=".*" species=".*" subprefix=".*" subspecies=".*">', '', text)
+	text = re.sub(r'<\/?sp>', '', text)
+	text = text.replace("</taxon>", "")
+	return text
+
 
 def alreadyLinked(linked_species, species):
 	for l in linked_species:
