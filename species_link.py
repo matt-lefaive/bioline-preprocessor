@@ -1,6 +1,24 @@
 import re
 
+### This will only be successful if being run as a sublime plugin 
+try:
+	import sublime
+	import sublime_plugin
 
+	class SpeciesLinkCommand(sublime_plugin.TextCommand):
+		def run(self, edit):
+			view = self.view
+			for region in view.sel():
+				if not region.empty():
+					link = getSpeciesLink(view.substr(region))
+					view.replace(edit, region, link)
+except ImportError:
+	pass
+except NameError:
+	pass
+
+
+### MAIN SPECIES LINK CODE ###
 def insertSpeciesLinks(text):
 	# Read in common species
 	f = open("./common_species.txt")
