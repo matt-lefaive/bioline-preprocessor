@@ -30,28 +30,31 @@ def insertSpeciesLinks(text):
 			index = 0
 			while index != -1:
 				try:
-					index = body[index:].index(species) + index
+					index = body[index:].lower().index(species.lower()) + index
 				except ValueError:
 					index = -1
 				else: # Index was found
 					front_body = body[:index]
 					end_body = body[index + len(species):]
 
+					# Get our species, case sensitive
+					case_sens_species = body[index : index + len(species)]
+
 					# If first occurrence of species add a link
-					if species not in linked_species:
-						insert = getSpeciesLink(species)
-						linked_species += [species, species.split(" ")[0]]
+					if species.lower() not in linked_species:
+						insert = getSpeciesLink(case_sens_species)
+						linked_species += [species.lower(), species.split(" ")[0].lower()]
 
 						# Add shortened genus form to list of short forms
-						addShortForms(short_forms, species)
+						addShortForms(short_forms, species.lower())
 
 
-					# Not first occurrence, italicize if not in a species link tag
+					# Not first occurrence, italicize if not in a species link tag and not italicized.
 					else:
-						if not in_sp_tag(body, index):
-							insert = "<i>" + species + "</i>"
+						if not in_sp_tag(body, index) and not is_italicized(body, index):
+							insert = "<i>" + case_sens_species + "</i>"
 						else:
-							insert = species
+							insert = case_sens_species
 
 					# Insert either a species link or italicized species name
 					index = index + len(insert)
@@ -76,6 +79,9 @@ def in_sp_tag(body, index):
 		return True
 	else:
 		return False
+
+def is_italicized(body, index):
+	return body[:index].endswith("<i>")
 
 def alreadyLinked(linked_species, species):
 	for l in linked_species:
