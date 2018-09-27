@@ -84,7 +84,7 @@ def surroundHeaders(text, front, special_front, back):
 	For a header h in common_headers, it is replaced by the sequence (special_)front+header+back, thereby
 	automatically applying bold, italics, or linebreaks to the different sections within an abstract.
 	'''
-	common_headers = ["background:", "Background:", "Background\n",
+	common_headers = ["background:", "Background:", "Background\n", "Context:",
 					  "materials and methods:", "Materials and methods:",
 					  "methods:", "method:", "Methods:", "Method:", "Methods\n", "Methodology:",
 					  "result:", "results:", "Result:", "Results:", "Results\n",
@@ -95,7 +95,7 @@ def surroundHeaders(text, front, special_front, back):
 					  "Antecedente:", "Objetivo:", "M&#233;todos:", "Resultados:", "Conclusiones:",
 					  ]
 	for header in common_headers:
-		if header.lower() not in {"background:", "background\n", "antecedente:", "introduction:", "introduction"}:
+		if header.lower() not in {"background:", "background\n", "antecedente:", "introduction:", "introduction", "context:"}:
 			text = text.replace(header, "\n" + front + header + back)
 		else:
 			text = text.replace(header, "\n" + special_front + header + back)
@@ -271,7 +271,7 @@ if not filepath.endswith("/"):
 	filepath += "/"
 
 # Make sure path meets the pattern: .../jjv(n)/xml/
-if not re.match(r'.*\/[a-z]{2}\d+\(\d+\)\/xml\/$', filepath):
+if not re.match(r'.*\/[a-z]{2}\d+\(.+\)\/xml\/$', filepath):
 	print("Error in filepath. Filepath should look like C:/.../jjvv(n)/xml")
 	exit()
 

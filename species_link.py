@@ -13,9 +13,9 @@ try:
 					# If a species link was highlighted, revert it to it's non-linked form
 					if is_species_link(view.substr(region)):
 						view.replace(edit, region, remove_species_link(view.substr(region)))
+					# Otherwise, a species was highlighted, so insert a link for it
 					else:
-						link = getSpeciesLink(view.substr(region))
-						view.replace(edit, region, link)
+						view.replace(edit, region, get_species_link(view.substr(region)))
 except ImportError:
 	pass
 except NameError:
@@ -64,11 +64,11 @@ def insertSpeciesLinks(text):
 
 					# If first occurrence of species add a link
 					if species.lower() not in linked_species:
-						insert = getSpeciesLink(case_sens_species)
+						insert = get_species_link(case_sens_species)
 						linked_species += [species.lower(), species.split(" ")[0].lower()]
 
 						# Add shortened genus form to list of short forms
-						addShortForms(short_forms, species.lower())
+						add_short_forms(short_forms, species.lower())
 
 
 					# Not first occurrence, italicize if not in a species link tag and not italicized.
@@ -106,107 +106,146 @@ def is_italicized(body, index):
 	return body[:index].endswith("<i>")
 
 def is_species_link(text):
-	return re.match(r'^<taxon genus=".*" species=".*" subprefix=".*" subspecies=".*">.*<\/taxon>$', text)
+	return re.match(r'^<taxon genus=".*" species=".*" sub-prefix=".*" sub-species=".*">.*<\/taxon>$', text)
 
 def remove_species_link(text):
-	text = re.sub(r'<taxon genus=".*" species=".*" subprefix=".*" subspecies=".*">', '', text)
+	text = re.sub(r'<taxon genus=".*" species=".*" sub-prefix=".*" sub-species=".*">', '', text)
 	text = re.sub(r'<\/?sp>', '', text)
 	text = text.replace("</taxon>", "")
 	return text
 
-
-def alreadyLinked(linked_species, species):
-	for l in linked_species:
-		if species.lower() == l.lower() or species in short_forms:
-			return True
-	return False
-
-def addShortForms(short_forms, species):
+def add_short_forms(short_forms, species):
 	components = species.split(" ")
 	if len(components) > 1:
 		short_forms += [components[0][0] + ". " + " ".join(components[1:])]
 
-def getSpeciesLink(link):
+def get_species_link(link):
 	#return "sp(" + species + ")"
 
 	tokens = link.split()
 
+	# Single genus name
 	if len(tokens) == 1:
 		link = genus_spp(tokens)
+
+	# Genus and subspecies
 	elif len(tokens) == 2:
 		if (tokens[1] == "sp." or tokens[1] == "spp."):
 			link = genus_spp(tokens)
 		else: # Note, judgement is required in cases of abbreviated species names. They get caught here
 			link = genus_species(tokens)
+
+	# Genus species subspecies, or links including "sp." and it's derivatives
 	elif len(tokens) == 3:
 		if (tokens[1] not in {"sp.", "spp."}):
 			if (is_parenthetical_match(tokens[0], tokens[1])):
 				link = genus_PARgenusPAR_subspecies(tokens)
+		
 			elif (is_parenthetical(tokens[1])):
 				link = genus_PARnamePAR_species(tokens)
+
+			else:
+				link = genus_species_subspecies(tokens)
+
+	# Standard genus, species, subprefix, and subspecies all in one link
 	elif len(tokens) == 4:
-		link = genus_species_varXcv_subspecies(tokens)
+		link = genus_species_subprefix_subspecies(tokens)
+
+	# Species name with multiple subprefixes
 	elif len(tokens) > 4:
 		link = genus_species_MERGE_subspecies(tokens)
 
 	return link
 				
 
-# 2 Tokens
 def genus_spp(tokens):
+	'''
+	Input:  Brassica
+	Output: <taxon genus="Brassica" species="" sub-prefix="" sub-species=""><sp>Brassica</sp></taxon>
+	'''
 	genus = tokens[0]
-	link = "<taxon genus=\"" + genus + "\" species=\"\" subprefix=\"\" subspecies=\"\">"
+	link = "<taxon genus=\"" + genus + "\" species=\"\" sub-prefix=\"\" sub-species=\"\">"
 	link += "<sp>" + genus + "</sp></taxon>"
 	return link
 
 def genus_species(tokens):
-	genus = tokens[0]
-	species = tokens[1]
-	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" subprefix=\"\" subspecies=\"\">"
+	'''
+	Input:  Brassica oleracea
+	Output: <taxon genus="Brassica" species="oleracea" sub-prefix="" sub-species=""><sp>Brassica</sp> <sp>oleracea</sp></taxon>
+	'''
+	(genus, species) = (tokens[0], tokens[1])
+	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" sub-prefix=\"\" sub-species=\"\">"
 	link += "<sp>" + genus + "</sp> <sp>" + species + "</sp></taxon>"
 	return link
 
-def genus_species_varXcv_subspecies(tokens):
-	genus = tokens[0]
-	species = tokens[1]
-	subprefix = tokens[2]
-	subspecies = tokens[3]
-	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" subprefix=\"" + subprefix + "\" subspecies=\"" + subspecies + "\">"
+def genus_species_subspecies(tokens):
+	'''
+	Input:  Brassica oleracea capitata
+	Output: <taxon genus="Brassica" species="oleracea" sub-prefix="" sub-species="capitata"><sp>Brassica</sp> <sp>oleracea</sp> <sp>capitata</sp></taxon>
+	'''
+	return genus_species_subprefix_subspecies([tokens[0], tokens[1], "", tokens[2]]).replace("  ", " ")
+
+def genus_species_subprefix_subspecies(tokens):
+	'''
+	Input:  Brassica oleracea var. capitata
+	Output: <taxon genus="Brassica" species="oleracea" sub-prefix="var" sub-species="capitata"><sp>Brassica</sp> <sp>oleracea</sp> var <sp>capitata</sp></taxon>
+	'''
+	(genus, species, subprefix, subspecies) = (tokens[0], tokens[1], tokens[2], tokens[3])
+	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" sub-prefix=\"" + subprefix + "\" sub-species=\"" + subspecies + "\">"
 	link += "<sp>" + genus + "</sp> <sp>" + species + "</sp> " + subprefix + " <sp>" + subspecies + "</sp></taxon>"
 	return link
 
 def genus_PARgenusPAR_subspecies(tokens):
+	'''
+	Input:  Brassica (brassica) oleracea
+	Output: <taxon genus="Brassica" species="brassica" subprefix="" subspecies="oleracea"><sp>Brassica</sp> <sp>(brassica)</sp> <sp>oleracea</sp></taxon>
+	'''
 	genus = tokens[0]
 	species = tokens[1][1:len(tokens[1])-1]
 	subspecies = tokens[2]
-	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" subprefix=\"\" subspecies=\"" + subspecies + "\">"
+	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" sub-prefix=\"\" sub-species=\"" + subspecies + "\">"
 	link += "<sp>" + genus + "</sp> <sp>" + tokens[1] + "</sp> <sp>" + subspecies + "</sp></taxon>"
 	return link
 
 def genus_PARnamePAR_species(tokens):
-	genus = tokens[0]
-	name = tokens[1]
-	species = tokens[2]
-	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" subprefix=\"\" subspecies=\"\">"
-	link += "<sp>" + genus + "</sp> " + tokens[1] + " <sp>" + species + "</sp></taxon>"
+	'''
+	Input:  Brassica (cabbage) oleracea
+	Output: <taxon genus="Brassica" species="oleracea" sub-prefix="" sub-species=""><sp>Brassica</sp> (cabbage) <sp>oleracea</sp></taxon>
+	'''
+	(genus, name, species) = tokens[0:3]
+	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" sub-prefix=\"\" sub-species=\"\">"
+	link += "<sp>" + genus + "</sp> " + name + " <sp>" + species + "</sp></taxon>"
 	return link
 
 def genus_species_MERGE_subspecies(tokens):
+	'''
+	Input:  Brassica oleracea var. nov. capitata
+	Output: <taxon genus="Brassica" species="oleracea" sub-prefix="" sub-species="capitata"><sp>Brassica</sp> <sp>oleracea</sp> var. nov. <sp>capitata</sp></taxon>
+	'''
 	genus = tokens[0]
 	species = tokens[1]
 	merge = ' '.join(tokens[2:-1])
 	subspecies = tokens[-1]
-	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" subprefix=\"\" subspecies=\"" + subspecies + "\">"
+	link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" sub-prefix=\"\" sub-species=\"" + subspecies + "\">"
 	link += "<sp>" + genus + "</sp> <sp>" + species + "</sp> " + merge + " <sp>" + subspecies + "</sp></taxon>"
 	return link
 
 def is_parenthetical_match(s1, s2):
+	'''
+	Returns True if s2 = ^s1$, where ^ and $ can be any character. False otherwise. Comparison is case-insensitive.
+
+	>>> is_parenthetical_match("ham", "(ham)")
+	True
+	'''
 	if len(s2) != len(s1) + 2:
 		return False
 	else:
 		return s1.lower() == s2[1:len(s2)-1].lower()
 
 def is_parenthetical(s):
+	'''
+	Returns True if s starts with ( and ends with )
+	'''
 	if len(s) < 2:
 		return False
 	else:
