@@ -34,6 +34,7 @@ Callinectes amnicola
 Callosobruchus maculatus
 Calotropis procera
 Camellia sinensis
+Camellia oleifera
 Candida albicans
 Candida parapsilosis
 Cardiosoma armatum
@@ -53,6 +54,7 @@ Cryptococcus neoformans
 Cucurbita maxima
 Cynoglossus semilaevis
 Cyperus esculentus
+Dichrocephala integrifolia
 Digitaria exilis
 Diospyros chamaethamnus
 Echinops kebericho
@@ -118,11 +120,13 @@ Pleurotus ostreatus
 Praomys tullbergi
 Pseudomonas alcaligenes
 Pseudomonas putida
+Punica granatum
 Rattus norvegicus
 Rhantarium epapposum
 Rhazya stricta
 Rhus succedanea
 Rosa canina
+Rubia cordifolia
 Rumex vesicarus
 Ruta chalepensis
 Saccharomyces cerevisiae
