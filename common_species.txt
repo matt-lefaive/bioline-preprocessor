@@ -4,9 +4,12 @@ Rhus succedanea var. himalaica
 Acacia baileyana
 Acacia dealbata
 Acacia melanoxylon
+Acalypha cuspidata
+Acanthospermum hispidum
 Adansonia digitata
 Aloe barbadensis
 Ailanthus excelsa
+Alloispermum integrifolium
 Amaranthus spinosus
 Antiaris africana
 Aphania senegalensis
@@ -60,11 +63,14 @@ Elephantorrhiza elephantina
 Entamoeba histolytica
 Enterobacter aerogenes
 Enterococcus faecalis
+Enterolobium cyclocarpum
 Ephedra alata
 Erythrococca bongensis
 Escherichia coli
 Eucalyptus nicholii
 Fasciola hepatica
+Galium mexicanum
+Garcinia kola
 Glycyrrhiza glabra
 Grewia trichocarpa
 Guibourtia coleosperma
@@ -84,6 +90,7 @@ Klebsiella oxytoca
 Klebsiella pneumoniae
 Klebsiella terrigena
 Lactuca sativa
+Lantana achyranthifolia
 Lasius niger
 Leptadenia hastata
 Lupinus hispanicus
@@ -96,6 +103,7 @@ Maesobotyra barteri
 Mammea siamensis
 Mannheimia haemolytica
 Manihot Esculenta
+Melaleuca alternifolia
 Micrococcus luteus
 Moltkia aurea
 Monodora Myrstica
@@ -127,11 +135,14 @@ Rumex vesicarus
 Ruta chalepensis
 Saccharomyces cerevisiae
 Salmonella typhi
+Salmonella typhimurium
+Salpianthus arenarius
 Schizosaccharomyces pombe
 Schotia brachypetala
 Scirpus validus
 Sclerocarya birrea
 Senna didymobotrya
+Senna occidentalis
 Solanum aethiopicum
 Solanum macrocarpon
 Solanum nigrum
@@ -185,6 +196,7 @@ Klebsiella
 Lactobacillus
 Mentha
 Micrococcus
+Monascus
 Nitrosomonas
 Paracoccus
 Pencillium
