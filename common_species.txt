@@ -88,12 +88,10 @@ Escherichia coli
 Eucalyptus globulus
 Eucalyptus nicholii
 Fasciola hepatica
-<<<<<<< HEAD
 Galium mexicanum
 Garcinia kola
 =======
 Glycine max
->>>>>>> 0103221d12cf02f521299df1c68a8fc52077d6ec
 Glycyrrhiza glabra
 Grewia trichocarpa
 Guibourtia coleosperma
@@ -174,14 +172,12 @@ Ruta chalepensis
 Saccharomyces cerevisiae
 Salmonella typhimurium
 Salmonella typhi
-<<<<<<< HEAD
 Salmonella typhimurium
 Salpianthus arenarius
 =======
 Salvia milthiorriza
 Saussurea involucrata
 Saussurea laniceps
->>>>>>> 0103221d12cf02f521299df1c68a8fc52077d6ec
 Schizosaccharomyces pombe
 Schotia brachypetala
 Scirpus validus
