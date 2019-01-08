@@ -9,7 +9,7 @@ inf_number = ""
 inf_journal_code = ""
 
 ### FUNCTIONS ###
-def setArticleId(filename, line):
+def set_article_id(filename, line):
 	''' (str, str) -> str
 	Sets id="jjxxx" to id=${filename} in the <article> line
 	'''
@@ -18,11 +18,11 @@ def setArticleId(filename, line):
 	new_line += line[line.index("lang="):]
 	return new_line
 
-def removeNA(line, tag):
+def remove_NA(line, tag):
 	'''(str) -> str
 	Removes n/a and its derivatives from tag specified by *tag*.
 
-	>>> removeNA("<title>NA</title>", "title")
+	>>> remove_NA("<title>NA</title>", "title")
 	"<title></title>"
 	'''
 	derivatives = ["na", "n/a", "none"]
@@ -32,7 +32,7 @@ def removeNA(line, tag):
 	# There were no na derivatives. Return the line as is.
 	return line
 
-def removeNAAuthors(lines):
+def remove_NA_Authors(lines):
 	''' ([str,]) -> None
 	Removes NA from any of the <author> and <authors> tags if applicable.
 	Mutates the list of lines passed in.
@@ -67,12 +67,18 @@ def commonTextSubs(text):
 					 "NH4+": "NH<sub>4</sub><sup>+</sup>",
 					 "&lt;i&gt;": "<i>",
 					 "&lt;/i&gt;": "</i>",
+					 "&lt;b&gt;": "<b>",
+					 "&lt;/b&gt;": "</b>",
+					 "&lt;!--": "<!--",
+					 "--&gt;": "-->",
 					 " L-1": " L<sup>-1</sup>", # leading space prevents formatting IL-1 (interleukin)
 					 "ha-1": "ha<sup>-1</sup>",
 					 "\\\'": "\'",
 					 "LC50": "LC<sub>50</sub>",
 					 "LD50": "LD<sub>50</sub>",
-					 "/m2": "/m<sup>2</sup>"}
+					 "IC50": "IC<sub>50</sub>",
+					 "/m2": "/m<sup>2</sup>",
+					 "m-1": "m<sup>-1</sup>"}
 
 	for key in substitutions.keys():
 		text = text.replace(key, substitutions[key])
@@ -84,21 +90,30 @@ def surroundHeaders(text, front, special_front, back):
 	For a header h in common_headers, it is replaced by the sequence (special_)front+header+back, thereby
 	automatically applying bold, italics, or linebreaks to the different sections within an abstract.
 	'''
-	common_headers = ["background:", "Background:", "Background\n", "Context:",
-					  "materials and methods:", "Materials and methods:",
-					  "methods:", "method:", "Methods:", "Method:", "Methods\n", "Methodology:",
+	intro_headers = ["background:", "Background:", "Background\n", "Context:", "Introduction:", "Introduction\n"]
+	common_headers = ["materials and methods:", "Materials and methods:", "Materials and Methods:",
 					  "result:", "results:", "Result:", "Results:", "Results\n",
 					  "conclusion:", "conclusions:", "Conclusion:", "Conclusions:", "Conclusions\n",
-					  "Introduction:", "Introduction\n",
 					  "Objective:", "Objectives:",
 					  "Discussion:", "Discussions:",
-					  "Antecedente:", "Objetivo:", "M&#233;todos:", "Resultados:", "Conclusiones:",
-					  ]
-	for header in common_headers:
-		if header.lower() not in {"background:", "background\n", "antecedente:", "introduction:", "introduction", "context:"}:
+					  "Antecedente:", "Objetivo:", "M&#233;todos:", "Resultados:", "Conclusiones:"]
+	method_headers = ["methods:", "method:", "Methods:", "Method:", "Methods\n", "Methodology:"]
+
+	for header in intro_headers + common_headers + method_headers:
+		# If not an intro header
+		if header.lower() not in [h.lower() for h in intro_headers]:
 			text = text.replace(header, "\n" + front + header + back)
 		else:
 			text = text.replace(header, "\n" + special_front + header + back)
+
+	# I know this is a bit of a hacky way to fix the problem of METHODS getting extra headers
+	# applied to it when its in MATERIALS AND METHODS. But it works for now. Sorry, will make
+	# this more elegant later.
+	problematic_headers = {"<br/><b>Materials and \n<br/><b>Methods:</b></b>": "<br/><b>Materials and Methods:</b></b>",
+						   "<br/><b>Materials and \n<br/><b>methods:</b></b>": "<br/><b>Materials and methods:</b></b>"}
+	for key in problematic_headers.keys():
+		text = text.replace(key, problematic_headers[key])
+
 	return text
 
 def getAttribute(text, attribute):
@@ -177,7 +192,10 @@ def updateIndexVN(line, VN, to_update):
         
     return spaces * " " + line
 
-def updateIndexYear(line):
+def update_index_year(line):
+	''' (str) -> str
+	Replace the year in the <index> line with inf_year (global variable)
+	'''
 	spaces = 0;
 	while(line[spaces] == ' '):
 		spaces += 1
@@ -190,17 +208,20 @@ def updateIndexYear(line):
 	# Return the line put back together
 	return spaces * " " + " ".join(tokens)
 
-def fixRedundantPageNumbers(line):
+def fix_redundant_page_numbers(line):
+	''' (str) -> str
+	Replaces redunant page numberings (those of the form pages="x-x") with
+	the simplified version (pages="x")
+	'''
 	pages = getAttribute(line, "pages")
 	if (re.match(r'(\d+)-\1', pages)):
 		line = updateAttribute("pages", pages[:pages.index("-")], line)
 	return line
 
-def fixDiscrepencies(files, directory_path, disc_type, expected):
+def fix_discrepencies(files, directory_path, disc_type, expected):
 	''' (dict, str, str, str) ->
 	For each file in files, the incorrect attribute (disc_type) is updated
 	with the correct value (expected).
-
 	'''
 	# Loop through each file that needs fixing
 	for filename in files.keys():
@@ -220,7 +241,7 @@ def fixDiscrepencies(files, directory_path, disc_type, expected):
 			lines[-3] = updateIndexVN(lines[-3], expected, disc_type[0])
 		# If the year was updated, we also need to change the index tag
 		if disc_type == "year":
-			lines[-3] = updateIndexYear(lines[-3])
+			lines[-3] = update_index_year(lines[-3])
 
 		# Rejoin all lines on newline and write to file
 		body = "\n".join(lines)
@@ -230,6 +251,9 @@ def fixDiscrepencies(files, directory_path, disc_type, expected):
 	print("")
 
 def write_problems_file(path, files):
+	''' (str, {str->str}) -> Null
+	Generates proofing file to be filled out by Proofing Student.
+	'''
 	file_body = "Proofed by: \n\n"
 	for file in files.keys():
 		file_body += file[:len(file)-4] + ":\n\n"
@@ -276,7 +300,7 @@ if not re.match(r'.*\/[a-z]{2}\d+\(.+\)\/xml\/$', filepath):
 	exit()
 
 # Get various other parameters about what to change
-copyright     = input("Enter the journal copyright (or 'default' to leave it as is): ")
+copyright     = input("Enter the journal copyright (or \"default\" to leave it as is): ")
 textSubs      = input("Autoformat common words? (y/n): ").lower()
 addNewLine    = input("Add newlines before results, method, conclusions, etc.? (y/n): ").lower()
 boldHeaders   = input("Make background, methods, results, etc. bold? (y/n): ").lower()
@@ -288,10 +312,10 @@ file_to_volume = dict()
 file_to_number = dict()
 file_to_year   = dict()
 
-# Implicitly determine year, issue, and number
+# Determine volume, year, issue, and number based on the path to the xml folder
 (inf_volume, inf_number, inf_year, inf_journal_code) = extract_implicit_info(filepath)
 
-print("\nPerforming preprocessing\n------------------------")
+print("\nPerforming preprocessing...\n------------------------")
 # Loop through each xml file in the directory
 for filename in os.listdir(filepath):
 	if filename.endswith(".xml"):
@@ -310,11 +334,11 @@ for filename in os.listdir(filepath):
 			continue
 
 		# Replace id="JJxxx" with appropriate values
-		print("... Processing " + filename)
-		lines[0] = setArticleId(filename, lines[0])
+		print("Processing " + filename + "...")
+		lines[0] = set_article_id(filename, lines[0])
 
 		# Fix redundant page numbers if possible
-		lines[0] = fixRedundantPageNumbers(lines[0])
+		lines[0] = fix_redundant_page_numbers(lines[0])
 
 		# Add elements to our discrepancy dictionaries
 		file_to_volume[filename] = getAttribute(lines[0], "volume")
@@ -322,29 +346,29 @@ for filename in os.listdir(filepath):
 		file_to_year[filename] = getAttribute(lines[0], "year")
 
 		# Remove NA from authors if applicable
-		removeNAAuthors(lines)
+		remove_NA_Authors(lines)
 
 		# Loop through remaining lines and replace values as appropriate
 		for i in range(len(lines)):
 			
 			# Replace NA titles if applicable
 			if lines[i].strip().startswith("<title"):
-				lines[i] = removeNA(lines[i], "title")
+				lines[i] = remove_NA(lines[i], "title")
 
 			# Replace NA keywords if applicable
 			elif lines[i].strip().startswith("<keyword"):
-				lines[i] = removeNA(lines[i], "keyword")
+				lines[i] = remove_NA(lines[i], "keyword")
 
 			# Replace NA abstracts if applicable
 			elif lines[i].strip().startswith("<abstract"):
-				lines[i] = removeNA(lines[i], "abstract")
+				lines[i] = remove_NA(lines[i], "abstract")
 
 			# Replace copyright if applicable
 			if lines[i].strip().startswith("<copyright") and lines[i].strip().endswith("</copyright>"):
 				if (copyright != "default"):
-					lines[i] = "<copyright>" + copyright + "</copyright>"
+					lines[i] = "  <copyright>" + copyright + "</copyright>"
 				else:
-					lines[i] = "<copyright>Copyright " + inf_year + " - " + lines[i][lines[i].find("<copyright>")+11:-12] + "</copyright>"
+					lines[i] = "  <copyright>Copyright " + inf_year + " - " + lines[i][lines[i].find("<copyright>")+11:-12] + "</copyright>"
 
 			# Remove superfluous commas from keywords if applicable
 			elif lines[i].strip().startswith("<keyword") and lines[i].strip().endswith("</keyword>"):
@@ -357,10 +381,6 @@ for filename in os.listdir(filepath):
 
 		# Join list of lines on newline char
 		body = "\n".join(lines)
-
-		# Perform common textual substitutions
-		if (textSubs == "y"):
-			body = commonTextSubs(body)
 
 		# Add linebreaks, italics, and bolds to common abstract sections
 		if (addNewLine == "y"):
@@ -376,6 +396,10 @@ for filename in os.listdir(filepath):
 			elif (italicHeaders == "y"):
 				body = surroundHeaders(body, "<i>", "<i>", "</i>")
 
+		# Perform common textual substitutions
+		if (textSubs == "y"):
+			body = commonTextSubs(body)
+
 		# Add species links if the user requested it
 		if speciesLinks:
 			body = insertSpeciesLinks(body)
@@ -386,28 +410,28 @@ for filename in os.listdir(filepath):
 		f.close()
 
 print("Done preprocessing!\n")
-print("Generating proofing file\n------------------------")
-write_problems_file(filepath + "../Problems.txt", file_to_volume)
+print("Generating proofing file...\n------------------------")
+write_problems_file(filepath + "../" + inf_journal_code + inf_volume + "(" + inf_number + ") Problems.txt", file_to_volume)
 print("Proofing file generated!\n")
 
-print("Performing Discrepancy Analysis\n------------------------")
+print("Performing Discrepancy Analysis...\n------------------------")
 
 # Fix any problems with volume numbers (if so desired by user)
 if existsDiscrepencies(file_to_volume, inf_volume):
 	problems = printDiscrepancyReport(file_to_volume, "volume")
 	if input("Would you like to automatically fix these problems? (y/n): ").lower() == "y":
-		fixDiscrepencies(problems, filepath, "volume", inf_volume)
+		fix_discrepencies(problems, filepath, "volume", inf_volume)
 
 # Fix any problems with issue numbers (if so desired by user)
 if existsDiscrepencies(file_to_number, inf_number):
 	problems = printDiscrepancyReport(file_to_number, "number")
 	if input("Would you like to automatically fix these problems? (y/n): ").lower() == "y":
-		fixDiscrepencies(problems, filepath, "number", inf_number)
+		fix_discrepencies(problems, filepath, "number", inf_number)
 
 # Fix any problems with published year (if so desired by user)
 if existsDiscrepencies(file_to_year, inf_year):
 	problems = printDiscrepancyReport(file_to_year, "year")
 	if input("Would you like to automatically fix these problems? (y/n): ").lower() == "y":
-		fixDiscrepencies(problems, filepath, "year", inf_year)
+		fix_discrepencies(problems, filepath, "year", inf_year)
 
 print("Discrepancies resolved!\nPlease proceed to manual processing of each file.")
