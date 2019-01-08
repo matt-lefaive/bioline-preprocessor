@@ -9,9 +9,11 @@ Acalypha cuspidata
 Acanthospermum hispidum
 Adansonia digitata
 Aloe barbadensis
+Alstonia boonei
 Ailanthus excelsa
 Alloispermum integrifolium
 Amaranthus spinosus
+Anthocleista vogelii
 Antiaris africana
 Aphania senegalensis
 Arachis hypogaea
@@ -67,6 +69,7 @@ Combretum collinum
 Corchorus olitorius
 Coriandrum sativum
 Cryptococcus neoformans
+Cryptolepis sanguinolenta
 Cucurbita maxima
 Cymbopogon citratus
 Cynoglossus semilaevis
@@ -90,7 +93,6 @@ Eucalyptus nicholii
 Fasciola hepatica
 Galium mexicanum
 Garcinia kola
-=======
 Glycine max
 Glycyrrhiza glabra
 Grewia trichocarpa
@@ -104,6 +106,7 @@ Hymenocarida acida
 Ipomoea batatas
 Iris germanica
 Jatropha curcas
+Kigellia africana
 Kirkia acuminata
 Klebsiella aerogenes
 Klebsiella ornithinolytica
@@ -155,6 +158,7 @@ Pinus eldarica
 Pinus koraiensis
 Pinus massoniana
 Pinus sylvestris
+Pithecellobium dulce
 Pleurotus ostreatus
 Portulaca oleracea
 Praomys tullbergi
@@ -174,7 +178,6 @@ Salmonella typhimurium
 Salmonella typhi
 Salmonella typhimurium
 Salpianthus arenarius
-=======
 Salvia milthiorriza
 Saussurea involucrata
 Saussurea laniceps
@@ -182,6 +185,7 @@ Schizosaccharomyces pombe
 Schotia brachypetala
 Scirpus validus
 Sclerocarya birrea
+Securidaca longepedunculata
 Senna didymobotrya
 Senna occidentalis
 Solanum aethiopicum
@@ -207,6 +211,7 @@ Trichoderma reesei
 Trichophyton tonsurans
 Tridax Procumbens
 Tripterygium wilfordii
+Urginea maritima
 Vernonia calvoana
 Vibrio cholerae
 Vigna radiata
@@ -230,6 +235,7 @@ Aspergillus
 Bacillus
 Bambusa
 Campylobacter
+Cassia
 Cephalosporium
 Chaetomium
 Cladosporium
