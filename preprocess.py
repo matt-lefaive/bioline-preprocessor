@@ -373,7 +373,6 @@ for filename in os.listdir(filepath):
 			# Remove superfluous commas from keywords if applicable
 			elif lines[i].strip().startswith("<keyword") and lines[i].strip().endswith("</keyword>"):
 				lines[i] = lines[i].replace(",;", ";")
-				lines[i] = lines[i].replace(",<", ",")
 
 			# Replace the id in the index tag with the appropriate value
 			elif lines[i].strip().startswith("<index>") and lines[i].strip().endswith("</index>"):
