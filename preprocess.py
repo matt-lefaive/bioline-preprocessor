@@ -96,7 +96,8 @@ def surroundHeaders(text, front, special_front, back):
 					  "conclusion:", "conclusions:", "Conclusion:", "Conclusions:", "Conclusions\n",
 					  "Objective:", "Objectives:",
 					  "Discussion:", "Discussions:",
-					  "Antecedente:", "Objetivo:", "M&#233;todos:", "Resultados:", "Conclusiones:"]
+					  "Antecedente:", "Objetivo:", "M&#233;todos:", "Resultados:", "Conclusiones:",
+					  "Aim", "Aims"]
 	method_headers = ["methods:", "method:", "Methods:", "Method:", "Methods\n", "Methodology:"]
 
 	for header in intro_headers + common_headers + method_headers:
