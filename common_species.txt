@@ -225,6 +225,60 @@ Zea mays
 Zilla spinosa
 Zingiber officinale
 Ziziphus nummularia
+Acacia mangium
+Apuleia leiocarpa
+Albizia lebbeck
+Aspergillus flavus
+Aspergillus fumigatus
+Aspergillus Niger
+Aspergillus wentii
+Axonopus compressus
+Beauveria bassiana
+Calliandra brevipes
+Capsicum annum
+Capsicum frutescens
+Chrysichthys nigrodigitatus
+Clarias gariepinus
+Dipteryx alata
+Encholirium spectabile
+Enterolobium contortisiliquum
+Eucalyptus urophylla
+Euterpe edulis
+Gynaikothrips ficorum
+Hypsipyla grandella
+Khaya ivorensis
+Lactuca Sativa
+Leucaena leucocephala
+Macrobrachium macrobrachion
+Mimosa artemisiana
+Mimosa caesalpiniifolia
+Monellia caryella
+Mugil cephalus
+Myracrodruon urundeuva
+Penaeus Monodon
+Pentaclethra macrophylla
+Phyllanthus sellowianus
+Phylloxera devastatrix
+Phylloxera notabilis
+Piper gaudichaudianu
+Plantago rugelii
+Poecilia reticulata
+Pouteria salicifolia
+Proteus vulgaris
+Pteridium arachnoideum
+Pterogyne nitens
+Rhizophagus clarus
+Rhododendron simsii
+Salix humboldtiana
+Salix rubens
+Sebastiania schottiana
+Sitotroga cerealella
+Sphenostylis stenocarpa
+Tectona grandis
+Thaumastocoris peregrinus
+Theobroma speciosum
+Trema micrantha
+Uca tangeri
 --------------------------------
 Acacia
 Acetobacter
@@ -234,6 +288,7 @@ Arthrobacter
 Aspergillus
 Bacillus
 Bambusa
+Brachiaria
 Campylobacter
 Cassia
 Cephalosporium
@@ -245,6 +300,8 @@ Curvularia
 Echium
 Epimedium
 Eucalyptus
+Hyla
+Isaria
 Klebsiella
 Lactobacillus
 Mentha
