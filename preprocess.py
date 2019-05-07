@@ -58,8 +58,8 @@ def remove_NA_authors(lines):
 
     # N.B.: <author> tag is always line 2.
     if re.match(
-                r'\s*\<author seq=\"1\"\>((n\/?a)|none)\<\/author\>', lines[1],
-                re.IGNORECASE
+                r'\s*\<author seq=\"1\"\>((n\/?a)|none)\<\/author\>',
+                lines[1], re.IGNORECASE
                 ) and re.match(r'\s*\<authors seq=\"1\"\>', lines[2]):
         # Replace line 2 with empty tag if NA was supplied as author's name
         lines[1] = "  <author seq=\"1\"></author>"
@@ -334,7 +334,7 @@ def fix_redundant_page_numbers(line):
     """
 
     pages = get_attribute(line, "pages")
-    if (re.match(r'(\d+)-\1', pages)):
+    if (re.match(r'(\d+)-\1$', pages)):
         line = update_attribute("pages", pages[:pages.index("-")], line)
     return line
 
