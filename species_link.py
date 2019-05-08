@@ -69,7 +69,6 @@ def insertSpeciesLinks(text):
         for species in species_list:  
             # EACH SPECIES MUST MATCH '.* .*'
             if not re.search(r'.* .*', species):
-                print("HEY")
                 continue
 
             matches = []
