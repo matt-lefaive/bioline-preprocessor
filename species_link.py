@@ -14,15 +14,11 @@ try:
                     # If a species link was highlighted, revert it to it's
                     # non-linked form
                     if is_species_link(view.substr(region)):
-                        view.replace(edit, region,
-                                     remove_species_link(view.substr(region))
-                                     )
+                        view.replace(edit, region, remove_species_link(view.substr(region)))
                     # Otherwise, a species was highlighted, so insert a link
                     # for it
                     else:
-                        view.replace(edit, region,
-                                     get_species_link(view.substr(region))
-                                     )
+                        view.replace(edit, region, get_species_link(view.substr(region)))
 except ImportError:
     pass
 except NameError:
@@ -34,7 +30,7 @@ def insertSpeciesLinks(text):
     """
     (str) -> str
     Inserts species links into text where possible, and returns the new text.
-    Requires text to contain match the following regex:
+    Requires text to match the following regex:
     .*<title.*</title>.*<abstract.*</abstract>.*<keyword.*</keyword>
 
     :param text: the text to insert species links in
@@ -60,94 +56,109 @@ def insertSpeciesLinks(text):
 
     # Move backwards from last language
     for j in range(len(start_title_indices) - 1, -1, -1):
-        # Clear lists cuz we're starting a new language
-        linked_species = []
+        # Clear lists and dicts cuz we're starting a new language
         short_forms = []
+        genus_to_species = dict()
 
         # Chunk out the portion of the body we want to work on
         body = main_body[start_title_indices[j]:end_abstract_indices[j]]
 
+        # PART ONE
+
         # Check the body for each individual species in common_species.txt
-        for species in species_list:
-            index = 0
-            while index != -1:
-                try:
-                    index = body[index:].lower().index(species.lower()) + index
-                except ValueError:
-                    index = -1
-                else:  # Index was found
-                    front_body = body[:index]
-                    end_body = body[index + len(species):]
+        for species in species_list:  
+            # EACH SPECIES MUST MATCH '.* .*'
+            if not re.search(r'.* .*', species):
+                print("HEY")
+                continue
 
-                    # Get our species, case sensitive
-                    case_sens_species = body[index: index + len(species)]
+            matches = []
+            short_matches = []
+            genus_matches = []
+            shortform = ''
+            parts = species.split(' ')
 
-                    # If first occurrence of species add a link
-                    if species.lower() not in linked_species:
-                        insert = get_species_link(case_sens_species)
-                        linked_species += [species.lower(),
-                                           species.split(" ")[0].lower()]
+            # Fill in the genus_to_species dict
+            if parts[0] not in genus_to_species:
+                genus_to_species[parts[0]] = []
+            if parts[1] not in genus_to_species[parts[0]]:
+                genus_to_species[parts[0]].append(parts[1])
 
-                        # Add shortened genus form to list of short forms
-                        add_short_forms(short_forms, species.lower())
+            # Get indices of all occurences of full species name
+            shortform = f'''{parts[0][0]}. {' '.join(parts[1:])}'''
+            for match in re.finditer(re.escape(parts[0]) + r' *\n? *' + re.escape(parts[1]), body, re.IGNORECASE):
+                matches.append(match.span())
 
-                    # Not first occurrence, italicize if not in a species link
-                    # tag and not italicized.
-                    else:
-                        if (not in_sp_tag(body, index) and
-                                not is_italicized(body, index)):
-                            insert = "<i>" + case_sens_species + "</i>"
-                        else:
-                            insert = case_sens_species
+            # Replace all full occurences with a standard '{genus} {species}' format.
+            # Italicize all but the first occurence
+            for i in range(len(matches) -1, -1, -1):
+                spec = remove_blank_chars(body[matches[i][0]: matches[i][1]])
+                if (i == 0):
+                    body = body[:matches[i][0]] + get_species_link(spec) + body[matches[i][1]:]
+                else:
+                    body = body[:matches[i][0]] + f'<i>{spec}</i>' + body[matches[i][1]:]
 
-                    # Insert either a species link or italicized species name
-                    index = index + len(insert)
-                    body = front_body + insert + end_body
+            # Get indices of all occurences of short form of species name
+            short_parts = shortform.split(' ')
+            if len(short_parts) > 1:
+                for match in re.finditer(re.escape(short_parts[0]) + r' *\n? *' + re.escape(' '.join(parts[1:])), body, re.IGNORECASE):
+                    short_matches.append(match.span())
 
-        # Go through body once more and italicize short forms for linked
-        # species
-        for sf in short_forms:
-            body = body.replace(sf, "<i>" + sf + "</i>")
+            # Replace all short form occurences with standard 'C. {species}' format.
+            # Italicize all occurences
+            for i in range(len(short_matches) -1, -1, -1):
+                spec = remove_blank_chars(body[short_matches[i][0]: short_matches[i][1]])
+                body = body[:short_matches[i][0]] + f'<i>{spec}</i>' + body[short_matches[i][1]:]
+
+        # PART TWO
+
+        # For each linked species, if it's genus occurs on its own before any links of the same
+        # genus (but different species), add a species link
+
+        # Find all species links for a given genus
+        for genus in genus_to_species.keys():
+
+            #matches = []
+            #for match in re.finditer(r'''<taxon genus="''' + re.escape(genus) + '\"', body, re.IGNORECASE):
+            #    matches.append(match.span())
+
+            # The following regex matches species links for any species of a given genus currently processed
+            master_reg = r'''<taxon genus="''' + re.escape(genus) + r'''" species="('''
+            for i in range(len(genus_to_species[genus])):
+                if i < len(genus_to_species[genus]) - 1:
+                    master_reg += re.escape(f'{genus_to_species[genus][i]}') + '|'
+                else:
+                    master_reg += re.escape(f'{genus_to_species[genus][i]}') + ''')"'''
+            
+            # Find all links that match said expression
+            matches = []
+            for match in re.finditer(master_reg, body, re.IGNORECASE):
+                matches.append(match.span())
+
+            if len(matches) > 0:
+                # Find first occurence of genus (on its own)
+                first_genus = re.search(re.escape(genus), body[:matches[0][0]], re.IGNORECASE)
+                if first_genus is not None:
+                    first_genus = first_genus.span()
+                
+                    # if first occurrence of genus preceedes 1st species link for it, add another link
+                    if (first_genus[1] < matches[0][0]):
+                        body = body[:first_genus[0]] + get_species_link(body[first_genus[0]:first_genus[1]]) + body[first_genus[1]:]
+
+                #Italicize subsequent occurrences of just the genus
+                matches = []
+                for match in re.finditer(r' ' + re.escape(genus) + r'[ \n\.,\?\!]', body, re.IGNORECASE):
+                    matches.append(match.span())
+
+                for i in range(len(matches) -1, -1, -1):
+                                                           #+1 and -1 to trim off surrounding chars
+                    body = body[:matches[i][0]] + ' <i>' + body[matches[i][0]+1:matches[i][1]-1] + "</i>" + body[matches[i][1]-1] + body[matches[i][1]:] 
 
         # Rejoin body to end of main_body
-        main_body = \
-            main_body[:start_title_indices[j]] + body + \
-            main_body[end_abstract_indices[j]:]
+        main_body = main_body[:start_title_indices[j]] + body + main_body[end_abstract_indices[j]:]
 
     # Rejoin all three parts of the article
     return pre_title + main_body + post_abstract
-
-
-def in_sp_tag(body, index):
-    """
-    (str, int) -> bool
-    Returns True if the index supplied is not already inside a species link
-    tag, False otherwise.
-
-    :param body: text possibly containing species links
-    :param index: the index to test
-    :returns: True if any char at index is not inside a species link
-    """
-
-    if (body[:index].endswith("<sp>")):
-        return True
-    elif (body[:index].endswith("genus=\"")):
-        return True
-    else:
-        return False
-
-
-def is_italicized(body, index):
-    """
-    (str, int) -> bool
-    Returns True if the text at the supplied index is italicized, False
-    otherwise
-
-    :param body: possibly italicized text
-    :param index: the index to test
-    :returns: True if any char at index is italicized /TODO: check this
-    """
-    return body[:index].endswith("<i>")
 
 
 def is_species_link(text):
@@ -161,6 +172,24 @@ def is_species_link(text):
 
     return re.match(r'''^<taxon genus=".*" species=".*" sub-prefix=
         ".*" sub-species=".*">.*<\/taxon>$''', text)
+
+
+def remove_blank_chars(text):
+    """
+    (str) -> str
+    Removes superfluous blank characters from text, leaving at most
+    a single space behind where there was more than one (space or newline)
+    
+    >>> remove_blank_chars('Happy    \n   \n Birthday')
+    "Happy Birthday"
+
+    :param text: text from which to remove superfluous blanks
+    :returns: text with superfluous blanks removed
+    """
+    text = text.replace('\n', ' ')
+    while '  ' in text:
+        text = text.replace('  ', ' ')
+    return text
 
 
 def remove_species_link(text):
@@ -181,22 +210,6 @@ def remove_species_link(text):
     text = text.replace("</taxon>", "")
     return text
 
-
-def add_short_forms(short_forms, species):
-    """
-    ([str], str) -> None
-    Adds the short form of a species name (abbreviated genus) to the list of
-    them. For species consisting of just a genus, no short form is added. This
-    mutates short_forms.
-
-    :param short_forms: a list of short forms for species encountered so far
-    :param species: the species to add a short form for
-    :returns: None
-    """
-
-    components = species.split(" ")
-    if len(components) > 1:
-        short_forms += [components[0][0] + ". " + " ".join(components[1:])]
 
 
 def get_species_link(link):
@@ -279,15 +292,6 @@ def is_parenthetical(s):
         return s[0] == "(" and s[-1] == ")"
 
 
-def sp(s):
-    """
-    (str) -> str
-    Surrounds s with <sp> and </sp> tags
-
-    :param s: string to place between tags
-    :returns: '<sp>s</sp>'
-    """
-    return "<sp>" + s + "</sp>"
 
 
 # The following methods all convert a species name into a species link. The
@@ -301,9 +305,8 @@ def genus_spp(tokens):
             <sp>Brassica</sp></taxon>
     """
     genus = tokens[0]
-    link = "<taxon genus=\"" + genus + "\" species=\"\" sub-prefix=\"\" "
-    link += "sub-species=\"\">" + sp(genus) + "</taxon>"
-    return link
+    return f'''<taxon genus="{genus}" species="" sub-prefix="", sub-species="">
+    <sp>{genus}</sp></taxon>'''
 
 
 def genus_species(tokens):
@@ -313,10 +316,8 @@ def genus_species(tokens):
     sub-species=""><sp>Brassica</sp> <sp>oleracea</sp></taxon>
     """
     (genus, species) = (tokens[0], tokens[1])
-    link = "<taxon genus=\"" + genus + "\" species=\"" + species + "\" "
-    link += "sub-prefix=\"\" sub-species=\"\">"
-    link += "<sp>" + genus + "</sp> <sp>" + species + "</sp></taxon>"
-    return link
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="", sub-species="">
+    <sp>{genus}</sp> <sp>{species}</sp></taxon>'''
 
 
 def genus_species_subspecies(tokens):
@@ -326,8 +327,7 @@ def genus_species_subspecies(tokens):
             sub-species="capitata"><sp>Brassica</sp> <sp>oleracea</sp>
             <sp>capitata</sp></taxon>
     """
-    return genus_species_subprefix_subspecies([tokens[0], tokens[1], "",
-                                              tokens[2]]).replace("  ", " ")
+    return genus_species_subprefix_subspecies([tokens[0], tokens[1], "", tokens[2]]).replace("  ", " ")
 
 
 def genus_species_subprefix_subspecies(tokens):
@@ -337,14 +337,9 @@ def genus_species_subprefix_subspecies(tokens):
             sub-species="capitata"><sp>Brassica</sp> <sp>oleracea</sp> var
                 <sp>capitata</sp></taxon>
     """
-    (genus, species, subprefix, subspecies) = (tokens[0], tokens[1], tokens[2],
-                                               tokens[3])
-    link = "<taxon genus=\"" + genus + "\" species=\"" + species
-    link += "\" sub-prefix=\"" + subprefix
-    link += "\" sub-species=\"" + subspecies + "\">"
-    link += "<sp>" + genus + "</sp> <sp>" + species + "</sp> " + subprefix
-    link += " <sp>" + subspecies + "</sp></taxon>"
-    return link
+    (genus, species, subprefix, subspecies) = (tokens[0], tokens[1], tokens[2], tokens[3])
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="{subprefix}", sub-species="{subspecies}">
+    <sp>{genus}</sp> <sp>{species}</sp> {subprefix} <sp>{subspecies}</sp></taxon>'''
 
 
 def genus_PARgenusPAR_subspecies(tokens):
@@ -357,11 +352,8 @@ def genus_PARgenusPAR_subspecies(tokens):
     genus = tokens[0]
     species = tokens[1][1:len(tokens[1])-1]
     subspecies = tokens[2]
-    link = "<taxon genus=\"" + genus + "\" species=\"" + species
-    link += "\" sub-prefix=\"\" sub-species=\"" + subspecies + "\">"
-    link += "<sp>" + genus + "</sp> <sp>" + tokens[1] + "</sp> <sp>"
-    link += subspecies + "</sp></taxon>"
-    return link
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="", sub-species="{subspecies}">
+    <sp>{genus}</sp> <sp>{tokens[1]}</sp> <sp>{subspecies}</sp></taxon>'''
 
 
 def genus_PARnamePAR_species(tokens):
@@ -372,11 +364,8 @@ def genus_PARnamePAR_species(tokens):
             </taxon>
     """
     (genus, name, species) = tokens[0:3]
-    link = "<taxon genus=\"" + genus + "\" species=\"" + species
-    link += "\" sub-prefix=\"\" sub-species=\"\">"
-    link += "<sp>" + genus + "</sp> " + name + " <sp>" + species
-    link += "</sp></taxon>"
-    return link
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="", sub-species="">
+    <sp>{genus}</sp> {name} <sp>{species}</sp></taxon>'''
 
 
 def genus_species_MERGE_subspecies(tokens):
@@ -390,8 +379,23 @@ def genus_species_MERGE_subspecies(tokens):
     species = tokens[1]
     merge = ' '.join(tokens[2:-1])
     subspecies = tokens[-1]
-    link = "<taxon genus=\"" + genus + "\" species=\"" + species
-    link += "\" sub-prefix=\"\" sub-species=\"" + subspecies + "\">"
-    link += "<sp>" + genus + "</sp> <sp>" + species + "</sp> " + merge
-    link += " <sp>" + subspecies + "</sp></taxon>"
-    return link
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="", sub-species="{subspecies}">
+    <sp>{genus}</sp> <sp>{species}</sp> {merge} <sp>{subspecies}</sp></taxon>'''
+
+
+# Sample XML article for testing
+if __name__ == '__main__':
+    article = '''    <article >
+        <title lang="en">Citrus limonum</title>
+        <abstract lang="en">This is a fake article about Citrus. There are two varieties
+        of Citrus, namely citrus medica and citrus limonum. A variety of people try to use
+        citrus like c. limonum and C. 
+        medica to treat wounds.
+        </abstract>
+        <keyword lang="en"></keyword>
+        <index></index>
+        <copyright></copyright>
+    </article>
+    '''
+    
+    print(insertSpeciesLinks(article))
