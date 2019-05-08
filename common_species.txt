@@ -34,6 +34,7 @@ Bauhinia variegata
 Bienertia sinuspersici
 Bombax ceiba
 Borago officinalis
+BULBINE ABYSSINICA
 Bursera aptera
 Cajanus cajan
 Callinectes amnicola
@@ -92,6 +93,7 @@ Galium mexicanum
 Garcinia kola
 Glycine max
 Glycyrrhiza glabra
+GONGRONEMA LATIFOLIUM
 Grewia trichocarpa
 Guibourtia coleosperma
 Helicobacter pylori
@@ -103,6 +105,7 @@ Hymenocarida acida
 Ipomoea batatas
 Iris germanica
 Jatropha curcas
+Kigelia africana
 Kigellia africana
 Kirkia acuminata
 Klebsiella aerogenes
@@ -143,6 +146,7 @@ Nymphaea lotus
 Ocimum basilicum
 Ocimum canum
 Oesophagostomum columbianum
+*Okoubaka aubrevillie
 Opuntia ficus-indica
 Oreochromis niloticus
 Oxygonum sinuatum
@@ -159,6 +163,7 @@ Pithecellobium dulce
 Pleurotus ostreatus
 Portulaca oleracea
 Praomys tullbergi
+Proteus mirabilis
 Pseudomonas alcaligenes
 Pseudomonas putida
 Punica granatum
@@ -210,10 +215,12 @@ Tridax Procumbens
 Tripterygium wilfordii
 Urginea maritima
 Vernonia calvoana
+VERNONIA AMYGDALINA
 Vibrio cholerae
 Vigna radiata
 Vigna subterranea
 Vigna unguiculata
+VITEX DONIANA
 Vitex grandifolia
 Xylopia aethiopica
 Zanthoxylum limonella
@@ -276,3 +283,5 @@ Thaumastocoris peregrinus
 Theobroma speciosum
 Trema micrantha
 Uca tangeri
+*ANANAS SATIVA
+DROSOPHILA MELANOGASTER
