@@ -71,6 +71,13 @@ def insertSpeciesLinks(text):
             if not re.search(r'.* .*', species):
                 continue
 
+            # A pseudospecies is a species that does not show up in the CRIA database
+            # Denoted by a prefixed asterisk (which we remove here)
+            pseudospecies = False
+            if species[0] == '*':
+                species = species[1:]
+                pseudospecies = True
+
             matches = []
             short_matches = []
             genus_matches = []
@@ -78,10 +85,16 @@ def insertSpeciesLinks(text):
             parts = species.split(' ')
 
             # Fill in the genus_to_species dict
-            if parts[0] not in genus_to_species:
-                genus_to_species[parts[0]] = []
-            if parts[1] not in genus_to_species[parts[0]]:
-                genus_to_species[parts[0]].append(parts[1])
+            if pseudospecies:
+                if '*' + parts[0] not in genus_to_species:
+                    genus_to_species['*' + parts[0]] = []
+                if parts[1] not in genus_to_species['*' + parts[0]]:
+                    genus_to_species['*' + parts[0]].append(parts[1])
+            else:
+                if parts[0] not in genus_to_species:
+                    genus_to_species[parts[0]] = []
+                if parts[1] not in genus_to_species[parts[0]]:
+                    genus_to_species[parts[0]].append(parts[1])
 
             # Get indices of all occurences of full species name
             shortform = f'''{parts[0][0]}. {' '.join(parts[1:])}'''
@@ -89,10 +102,10 @@ def insertSpeciesLinks(text):
                 matches.append(match.span())
 
             # Replace all full occurences with a standard '{genus} {species}' format.
-            # Italicize all but the first occurence
+            # Italicize all but the first occurence (if not a pseudospecies)
             for i in range(len(matches) -1, -1, -1):
                 spec = remove_blank_chars(body[matches[i][0]: matches[i][1]])
-                if (i == 0):
+                if (i == 0 and not pseudospecies):
                     body = body[:matches[i][0]] + get_species_link(spec) + body[matches[i][1]:]
                 else:
                     body = body[:matches[i][0]] + f'<i>{spec}</i>' + body[matches[i][1]:]
@@ -117,41 +130,38 @@ def insertSpeciesLinks(text):
         # Find all species links for a given genus
         for genus in genus_to_species.keys():
 
-            #matches = []
-            #for match in re.finditer(r'''<taxon genus="''' + re.escape(genus) + '\"', body, re.IGNORECASE):
-            #    matches.append(match.span())
-
             # The following regex matches species links for any species of a given genus currently processed
-            master_reg = r'''<taxon genus="''' + re.escape(genus) + r'''" species="('''
-            for i in range(len(genus_to_species[genus])):
-                if i < len(genus_to_species[genus]) - 1:
-                    master_reg += re.escape(f'{genus_to_species[genus][i]}') + '|'
-                else:
-                    master_reg += re.escape(f'{genus_to_species[genus][i]}') + ''')"'''
-            
-            # Find all links that match said expression
+            if genus[0] != '*':
+                master_reg = r'''<taxon genus="''' + re.escape(genus) + r'''" species="('''
+                for i in range(len(genus_to_species[genus])):
+                    if i < len(genus_to_species[genus]) - 1:
+                        master_reg += re.escape(f'{genus_to_species[genus][i]}') + '|'
+                    else:
+                        master_reg += re.escape(f'{genus_to_species[genus][i]}') + ''')"'''
+                
+                # Find all links that match said expression
+                matches = []
+                for match in re.finditer(master_reg, body, re.IGNORECASE):
+                    matches.append(match.span())
+    
+                if len(matches) > 0:
+                    # Find first occurence of genus (on its own)
+                    first_genus = re.search(re.escape(genus), body[:matches[0][0]], re.IGNORECASE)
+                    if first_genus is not None:
+                        first_genus = first_genus.span()
+                    
+                        # if first occurrence of genus preceedes 1st species link for it, add another link
+                        if (first_genus[1] < matches[0][0]):
+                            body = body[:first_genus[0]] + get_species_link(body[first_genus[0]:first_genus[1]]) + body[first_genus[1]:]
+
+            #Italicize subsequent occurrences of just the genus
             matches = []
-            for match in re.finditer(master_reg, body, re.IGNORECASE):
+            for match in re.finditer(r' ' + re.escape(genus.replace('*','')) + r'[ \n\.,\?\!]', body, re.IGNORECASE):
                 matches.append(match.span())
 
-            if len(matches) > 0:
-                # Find first occurence of genus (on its own)
-                first_genus = re.search(re.escape(genus), body[:matches[0][0]], re.IGNORECASE)
-                if first_genus is not None:
-                    first_genus = first_genus.span()
-                
-                    # if first occurrence of genus preceedes 1st species link for it, add another link
-                    if (first_genus[1] < matches[0][0]):
-                        body = body[:first_genus[0]] + get_species_link(body[first_genus[0]:first_genus[1]]) + body[first_genus[1]:]
-
-                #Italicize subsequent occurrences of just the genus
-                matches = []
-                for match in re.finditer(r' ' + re.escape(genus) + r'[ \n\.,\?\!]', body, re.IGNORECASE):
-                    matches.append(match.span())
-
-                for i in range(len(matches) -1, -1, -1):
+            for i in range(len(matches) -1, -1, -1):
                                                            #+1 and -1 to trim off surrounding chars
-                    body = body[:matches[i][0]] + ' <i>' + body[matches[i][0]+1:matches[i][1]-1] + "</i>" + body[matches[i][1]-1] + body[matches[i][1]:] 
+                body = body[:matches[i][0]] + ' <i>' + body[matches[i][0]+1:matches[i][1]-1] + "</i>" + body[matches[i][1]-1] + body[matches[i][1]:] 
 
         # Rejoin body to end of main_body
         main_body = main_body[:start_title_indices[j]] + body + main_body[end_abstract_indices[j]:]
@@ -390,6 +400,7 @@ if __name__ == '__main__':
         of Citrus, namely citrus medica and citrus limonum. A variety of people try to use
         citrus like c. limonum and C. 
         medica to treat wounds.
+        Don't forget Ananas like Ananas sativa though
         </abstract>
         <keyword lang="en"></keyword>
         <index></index>
