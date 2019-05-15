@@ -10,8 +10,10 @@ Acacia melanoxylon
 Acalypha cuspidata
 Acanthospermum hispidum
 Adansonia digitata
+Adenanthos sericeus
 Ailanthus excelsa
 Albizia lebbeck
+Allium cepa
 Alloispermum integrifolium
 Aloe barbadensis
 Alstonia boonei
@@ -40,6 +42,7 @@ Azadirachta indica
 Bacillus cereus
 Bacillus coagulans
 Bacillus macerans
+Bacillus subtilis
 Balanites aegyptiaca
 Bambusa vulgaris
 Bauhinia variegata
@@ -144,6 +147,7 @@ Ilex paraguariensis
 Ipomoea batatas
 Iris germanica
 Jatropha curcas
+Juniperus procera
 Khaya ivorensis
 Kigelia africana
 Kigellia africana
@@ -159,11 +163,13 @@ Lasius niger
 Lentinus Squarrosulus
 Leptadenia hastata
 Leucaena leucocephala
+Lumbricus terrestris
 Lupinus hispanicus
 Lupinus luteus
 Lupinus mutabilis
 Lycium barbarum
 Lycium ruthenicum
+Lycopersicon esculentum
 Lymnea natalensis
 Lysimachia vulgaris
 Macrobrachium macrobrachion
@@ -193,10 +199,12 @@ Myracrodruon urundeuva
 Nasturtium officinale
 Nectandra reticulata
 Nigella sativa
+Nitrosomonas aestuarii
 Nymphaea lotus
 Ocimum basilicum
 Ocimum canum
 Oesophagostomum columbianum
+Olea europaea
 Opuntia ficus-indica
 Oreochromis niloticus
 Otoba parvifolia
@@ -207,6 +215,7 @@ Panax notoginseng
 Penaeus Monodon
 Pentaclethra macrophylla
 Pentanisia prunelloides
+Periophthalmus papilio
 Phaseolus acutifolias
 Phyllanthus sellowianus
 Phylloxera devastatrix
@@ -221,6 +230,8 @@ Piper gaudichaudianu
 Pithecellobium dulce
 Plantago rugelii
 Pleurotus ostreatus
+Pleurotus pulmonarius
+Podocarpus falcatus
 Poecilia reticulata
 Portulaca oleracea
 Pouteria salicifolia
@@ -274,10 +285,12 @@ Sphenostylis stenocarpa
 Spilanthes oleracea
 Staphylococcus aureus
 Staphylococcus epidermidis
+Streptococcus faecalis
 Streptococcus mutans
 Streptococcus pyogenes
 Streptomyces albus
 Strychnos spinosa
+Sudanonautes africanus
 Swietenia macrophylla
 Tabebuia aurea
 Talinum portulacifolium
