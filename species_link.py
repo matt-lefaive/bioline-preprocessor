@@ -314,7 +314,7 @@ def genus_spp(tokens):
             <sp>Brassica</sp></taxon>
     """
     genus = tokens[0]
-    return f'''<taxon genus="{genus}" species="" sub-prefix="", sub-species="">
+    return f'''<taxon genus="{genus}" species="" sub-prefix="" sub-species="">
     <sp>{genus}</sp></taxon>'''
 
 
@@ -325,7 +325,7 @@ def genus_species(tokens):
     sub-species=""><sp>Brassica</sp> <sp>oleracea</sp></taxon>
     """
     (genus, species) = (tokens[0], tokens[1])
-    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="", sub-species="">
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="" sub-species="">
     <sp>{genus}</sp> <sp>{species}</sp></taxon>'''
 
 
@@ -347,7 +347,7 @@ def genus_species_subprefix_subspecies(tokens):
                 <sp>capitata</sp></taxon>
     """
     (genus, species, subprefix, subspecies) = (tokens[0], tokens[1], tokens[2], tokens[3])
-    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="{subprefix}", sub-species="{subspecies}">
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="{subprefix}" sub-species="{subspecies}">
     <sp>{genus}</sp> <sp>{species}</sp> {subprefix} <sp>{subspecies}</sp></taxon>'''
 
 
@@ -361,7 +361,7 @@ def genus_PARgenusPAR_subspecies(tokens):
     genus = tokens[0]
     species = tokens[1][1:len(tokens[1])-1]
     subspecies = tokens[2]
-    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="", sub-species="{subspecies}">
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="" sub-species="{subspecies}">
     <sp>{genus}</sp> <sp>{tokens[1]}</sp> <sp>{subspecies}</sp></taxon>'''
 
 
@@ -373,7 +373,7 @@ def genus_PARnamePAR_species(tokens):
             </taxon>
     """
     (genus, name, species) = tokens[0:3]
-    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="", sub-species="">
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="" sub-species="">
     <sp>{genus}</sp> {name} <sp>{species}</sp></taxon>'''
 
 
@@ -388,7 +388,7 @@ def genus_species_MERGE_subspecies(tokens):
     species = tokens[1]
     merge = ' '.join(tokens[2:-1])
     subspecies = tokens[-1]
-    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="", sub-species="{subspecies}">
+    return f'''<taxon genus="{genus}" species="{species}" sub-prefix="" sub-species="{subspecies}">
     <sp>{genus}</sp> <sp>{species}</sp> {merge} <sp>{subspecies}</sp></taxon>'''
 
 

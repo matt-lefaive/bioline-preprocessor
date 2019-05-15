@@ -82,6 +82,18 @@ def set_index_id(filename, line):
     return line[0:line.index("xxx<")-2] + filename[0:-4] + "</index>"
 
 
+def remove_terminal_hyphen_space(text):
+    """
+    (str) -> str
+    Removes the newline character and any whitespace between the 1st half
+    of a hyphenated word and the 2nd half on the next line.
+
+    :param text: text from which to remove hyphen space
+    :returns: text with unnecessary hyphenated space removed
+    """
+    return re.sub(r'-\n ?', '-', text)
+
+
 def common_text_subs(text):
     """
     (str) -> str
@@ -100,6 +112,7 @@ def common_text_subs(text):
                      "NO2-": "NO<sub>2</sub><sup>-</sup>",
                      "NO2": "NO<sub>2</sub>",
                      "NH4+": "NH<sub>4</sub><sup>+</sup>",
+                     "H2SO4": "H<sub>2</sub>SO<sub>4</sub>"
                      "&lt;i&gt;": "<i>",
                      "&lt;/i&gt;": "</i>",
                      "&lt;b&gt;": "<b>",
@@ -162,9 +175,9 @@ def surround_headers(text, front, special_front, back):
     # extra headers applied to it when its in MATERIALS AND METHODS. But it
     # works for now.
     problematic_headers = {"<br/><b>Materials and \n<br/><b>Methods:</b></b>":
-                           "<br/><b>Materials and Methods:</b></b>",
+                           "<br/><b>Materials and Methods:</b>",
                            "<br/><b>Materials and \n<br/><b>methods:</b></b>":
-                           "<br/><b>Materials and methods:</b></b>"}
+                           "<br/><b>Materials and methods:</b>"}
     for key in problematic_headers.keys():
         text = text.replace(key, problematic_headers[key])
 
@@ -442,19 +455,14 @@ if not re.match(r'.*\/[a-z]{2}\d+\(.+\)\/xml\/$', filepath):
     exit()
 
 # Get various other parameters about what to change
-copyright = input("""Enter the journal copyright (or \"default\" to leave
-     it as is): """)
+copyright = input("Enter the journal copyright (or \"default\" to leave it as is): ")
 textSubs = input("Autoformat common words? (y/n): ").lower()
-addNewLine = input("""Add newlines before results, method, conclusions,
-     etc.? (y/n): """).lower()
-boldHeaders = input("""Make background, methods, results, etc. bold? (y/n):
-     """).lower()
+addNewLine = input("Add newlines before results, method, conclusions, etc.? (y/n): ").lower()
+boldHeaders = input("Make background, methods, results, etc. bold? (y/n): ").lower()
 italicHeaders = "n"
-if (boldHeaders.lower() == "y"):
-    italicHeaders = input("""Make background, methods, results, etc.
-         italicized? (y/n): """).lower()
-speciesLinks = input("""Automatically attempt to insert species links? (y/n):
-     """).lower()
+if (boldHeaders == "n"):
+    italicHeaders = input("Make background, methods, results, etc. italicized? (y/n): ").lower()
+speciesLinks = input("Automatically attempt to insert species links? (y/n): ").lower()
 
 # Define dictionaries to search for discrepancies
 file_to_volume = dict()
@@ -558,6 +566,9 @@ for filename in os.listdir(filepath):
         # Add species links if the user requested it
         if speciesLinks:
             body = insertSpeciesLinks(body)
+
+        # Remove superfluous whitespace at hyphenated line breaks
+        body = remove_terminal_hyphen_space(body)
 
         # Write processed lines back to the file
         f = open(filepath + filename, "w")
