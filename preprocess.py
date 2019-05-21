@@ -449,9 +449,40 @@ def save_config(config):
 		config_f.write(key + '=' + str(config[key]) + '\n' * (0 if key == 'SPECIESLINKS' else 1))
 	config_f.close()
 
+def get_input(message, input_type):
+	'''
+
+	:param type: 's' -> str, 'i' -> int, 'b' -> bool
+	'''
+	input_type = input_type.lower()
+	valid_input = False
+	while not valid_input:
+		user_input = input(message).strip('\n')
+		
+		if len(user_input) == 0:
+			pass
+		elif input_type == 's':
+			valid_input = True
+		elif input_type == 'i':
+			try:
+				user_input = int(user_input)
+				valid_input = True
+			except ValueError:
+				print('Please enter an integer.\n')
+			except Exception as ex:
+				print(f'{colours.RED}(ERR 03):{colours.ENDC} {str(ex)}')
+		elif input_type == 'b':
+			user_input = bval(user_input)
+			valid_input = True
+			
+	return user_input
+
+
+
+
 # MAIN CODE #
 # Get the file path of the /xml folder and appropriately format it
-filepath = input("Enter path to xml folder to process: ")
+filepath = get_input("Enter path to xml folder to process: ", 's')
 filepath = filepath.replace("\\", "/")
 if not filepath.endswith("/"):
 	filepath += "/"
@@ -504,20 +535,20 @@ try:
 except FileNotFoundError:
 	# Manually retrieve config values from user
 
-	copyright = input("Enter the journal copyright (or \"default\" if unsure): ")
-	textSubs = bval(input(f"Auto-format common words? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
-	addNewLine = bval(input(f"Add newlines before abstract section headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
+	copyright = get_input("Enter the journal copyright (or \"default\" if unsure): ", 's')
+	textSubs = get_input(f"Auto-format common words? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
+	addNewLine = get_input(f"Add newlines before abstract section headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
 	if (addNewLine):
-		before_newline_count = int(input("How many? "))
-	addNewLine = bval(input(f"Add newlines after abstract section headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
+		before_newline_count = get_input("How many? ", 'i')
+	addNewLine = get_input(f"Add newlines after abstract section headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
 	if (addNewLine):
-		after_newline_count = int(input("How many? "))
-	boldHeaders = bval(input(f"Bold abstract headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
-	italicHeaders = bval(input(f"Italic abstract headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
-	speciesLinks = bval(input(f"Attempt to automatically insert species links? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
+		after_newline_count = get_input("How many? ", 'i')
+	boldHeaders = get_input(f"Bold abstract headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
+	italicHeaders = get_input(f"Italic abstract headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
+	speciesLinks = get_input(f"Attempt to automatically insert species links? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
 	
 	# Save configuration for later reuse if desired
-	save = bval(input(f'Save this configuration for {inf_journal_code}? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): '))
+	save = get_input(f'Save this configuration for {inf_journal_code}? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ', 's')
 	if (save):
 		config = {
 			'COPYRIGHT': copyright,
@@ -652,19 +683,19 @@ confirmation = f"    Would you like to automatically fix these problems? ({colou
 
 if exists_discrepencies(file_to_volume, inf_volume):
 	problems = print_discrepancy_report(file_to_volume, "volume")
-	if input(confirmation).lower() == "y":
+	if get_input(confirmation, 'b'):
 		fix_discrepencies(problems, filepath, "volume", inf_volume)
 
 # Fix any problems with issue numbers (if so desired by user)
 if exists_discrepencies(file_to_number, inf_number):
 	problems = print_discrepancy_report(file_to_number, "number")
-	if input(confirmation).lower() == "y":
+	if get_input(confirmation, 'b'):
 		fix_discrepencies(problems, filepath, "number", inf_number)
 
 # Fix any problems with published year (if so desired by user)
 if exists_discrepencies(file_to_year, inf_year):
 	problems = print_discrepancy_report(file_to_year, "year")
-	if input(confirmation).lower() == "y":
+	if get_input(confirmation, 'b'):
 		fix_discrepencies(problems, filepath, "year", inf_year)
 
 print(f'    {colours.GREEN}Discrepancies resolved!{colours.ENDC}\n\nPlease proceed to manual processing of each file.')
