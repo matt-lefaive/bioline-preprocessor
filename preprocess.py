@@ -2,6 +2,7 @@ import os
 import re
 from species_link import insertSpeciesLinks
 from colours import colours
+from xml import xml
 
 # Global variables. inf prefixe stands for 'inferred'
 inf_year = ""
@@ -224,25 +225,7 @@ def surround_headers(text, front, special_front, back):
 	return text
 
 
-def get_attribute(text, attribute):
-	"""
-	(str, str) -> str
-	Returns the value of a given attribute in a line of text (where text is
-	enclosed in valid xml tags of the form <X></X>)
 
-	>>> get_attribute('<article year="1997"></article>', 'year')
-	"1997"
-
-	:param text: text from which to extract the value of an attribute
-	:param attribute: the attribute who's value we're extracting
-	:returns: the value of attribute
-	"""
-
-	start = attribute + "=\""
-	if start not in text:
-		return ""
-	text = text[text.index(start) + len(start):]
-	return text[:text.index("\"")]
 
 
 def exists_discrepencies(d, expected):
@@ -287,35 +270,6 @@ def print_discrepancy_report(d, disc_type):
 			  "\" but got " + disc_type + "=\"" + problems[key] + "\"")
 	print("")
 	return problems
-
-
-def update_attribute(attribute, new_val, text):
-	"""
-	(str, str, str) -> str
-	Replaces the value of attribute in (XML) text with new_val
-
-	>>> update_attribute('id', '222', '<a id=\"111\"></a>')
-	"<a id="222"></a>
-
-	:param attribute: the attribute who's value is to be updated
-	:param new_val: the new value for attribute
-	:param text: the text containing attribute
-	:returns: text with value of attribute set to new_val
-	"""
-
-	# Get everything up to the point we have to change
-	att = attribute + "=\""
-	front_index = text.index(attribute) + len(att)
-	front_text = text[:front_index]
-
-	# Get everything after the point we have to change
-	i = front_index
-	while (text[i] != '\"' and i < len(text)):
-		i = i + 1
-	end_text = text[i:]
-
-	# Sandwich in new attribute
-	return front_text + new_val + end_text
 
 
 def update_index_VN(line, VN, to_update):
@@ -386,9 +340,9 @@ def fix_redundant_page_numbers(line):
 	:returns: line with redundant page numbering removed
 	"""
 
-	pages = get_attribute(line, "pages")
+	pages = xml.get_attribute(line, "pages")
 	if (re.match(r'(\d+)-\1$', pages)):
-		line = update_attribute("pages", pages[:pages.index("-")], line)
+		line = xml.set_attribute("pages", pages[:pages.index("-")], line)
 	return line
 
 
@@ -416,7 +370,7 @@ def fix_discrepencies(files, directory_path, disc_type, expected):
 		f.close()
 
 		# replace the incorrect attribute with the expected one
-		lines[0] = update_attribute(disc_type, expected, lines[0])
+		lines[0] = xml.set_attribute(disc_type, expected, lines[0])
 
 		# If volume or number or were changed, we also need to update the index
 		# tag
@@ -504,7 +458,8 @@ if not filepath.endswith("/"):
 
 # Make sure path meets the pattern: .../jjv(n)/xml/
 if not re.match(r'.*\/[a-z]{2}\d+\(.+\)\/xml\/$', filepath):
-	print("Error in filepath. Filepath should look like C:/.../jjvv(n)/xml")
+	print(f"{colours.RED}FILEPATH FORMAT ERROR (ERR 002):{colours.ENDC}" + \
+		"Filepath should end with /jjvv(n)/xml (matching regex .*\/[a-z]{2}\d+\(.+\)\/xml\/$)")
 	exit()
 
 # Determine volume, year, issue, and number based on the path to the xml folder
@@ -610,9 +565,9 @@ for filename in os.listdir(filepath):
 		lines[0] = fix_redundant_page_numbers(lines[0])
 
 		# Add elements to our discrepancy dictionaries
-		file_to_volume[filename] = get_attribute(lines[0], "volume")
-		file_to_number[filename] = get_attribute(lines[0], "number")
-		file_to_year[filename] = get_attribute(lines[0], "year")
+		file_to_volume[filename] = xml.get_attribute(lines[0], "volume")
+		file_to_number[filename] = xml.get_attribute(lines[0], "number")
+		file_to_year[filename] = xml.get_attribute(lines[0], "year")
 
 		# Remove NA from authors if applicable
 		remove_NA_authors(lines)
@@ -693,7 +648,7 @@ print(f"    {colours.GREEN}Proofing file generated!{colours.ENDC}")
 print(f"\n{colours.YELLOW}Performing Discrepancy Analysis{colours.ENDC}")
 
 # Fix any problems with volume numbers (if so desired by user)
-confirmation = f"Would you like to automatically fix these problems? {colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}: "
+confirmation = f"    Would you like to automatically fix these problems? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "
 
 if exists_discrepencies(file_to_volume, inf_volume):
 	problems = print_discrepancy_report(file_to_volume, "volume")
