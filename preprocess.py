@@ -96,45 +96,6 @@ def remove_terminal_hyphen_space(text):
 	return re.sub(r'-\n ?', '-', text)
 
 
-def fix_scientific_notation(text):
-	"""
-	(str) -> str
-	Applies <sup></sup> tags to the exponent of any numbers written in
-	scientific notation in text. May (rarely) overapply in practice
-
-	>>>fix_scientific_notation('2.73 x 107')
-	"2.73 x 10<sup>7</sup>"
-	
-	:param text: text in which to add superscripts to exponents
-	:returns: text with superscripts added to exponents
-	"""
-	matches = []
-	for match in re.finditer(r'\d\.\d+ ?\n?(x|X|&#215;)\n? ?10-?\d+', text):
-		matches.append(match.span())
-
-	# Starting backwards, cycle through each match
-	for i in range(len(matches) -1, -1, -1):
-		num_str = text[matches[i][0] : matches[i][1]]
-		
-		# Figure out how many of the last chars are exponents
-		j = len(num_str) - 1
-		exp_count = 0
-		final_num = ''
-		while not final_num.startswith('10'):
-			final_num = num_str[j] + final_num
-			j -= 1
-			exp_count += 1
-		exp_count -= 2 # Since the 10 part doesn't count
-
-		# Fill in text with superscripts
-		insert = num_str[:len(num_str)-exp_count] + '<sup>' + num_str[len(num_str)-exp_count:] +'</sup>'
-		text = text[:matches[i][0]] + insert + text[matches[i][1]:]
-
-	return text
-
-
-
-
 
 def common_text_subs(text):
 	"""
@@ -146,33 +107,37 @@ def common_text_subs(text):
 	:param text: text in which to replace unformatted words
 	:returns: text with proper xml format tags applied
 	"""
-	substitutions = {"H2O2": "H<sub>2</sub>O<sub>2</sub>",
-					 "H2O": "H<sub>2</sub>O",
-					 "CO2": "CO<sub>2</sub>",
-					 "NO3-": "NO<sub>3</sub><sup>-</sup>",
-					 "NO3": "NO<sub>3</sub>",
-					 "NO2-": "NO<sub>2</sub><sup>-</sup>",
-					 "NO2": "NO<sub>2</sub>",
-					 "NH4+": "NH<sub>4</sub><sup>+</sup>",
-					 "H2SO4": "H<sub>2</sub>SO<sub>4</sub>",
-					 "&lt;i&gt;": "<i>",
-					 "&lt;/i&gt;": "</i>",
-					 "&lt;b&gt;": "<b>",
-					 "&lt;/b&gt;": "</b>",
-					 "&lt;!--": "<!--",
-					 "--&gt;": "-->",
-					 " L-1": " L<sup>-1</sup>",
-					 "ha-1": "ha<sup>-1</sup>",
-					 "\\\'": "\'",
-					 "LC50": "LC<sub>50</sub>",
-					 "LD50": "LD<sub>50</sub>",
-					 "IC50": "IC<sub>50</sub>",
-					 "/m2": "/m<sup>2</sup>",
-					 "m-1": "m<sup>-1</sup>",
-					 "g-1": "g<sup>-1</sup>"}
+	# Store the regexes a single-item tuples (so they'll work in the loop)
+	txt_substitutions = {
+		'H2O2': 'H<sub>2</sub>O<sub>2</sub>',
+		'H2O': 'H<sub>2</sub>O',
+		'H20': 'H<sub>2</sub>0',
+		'H2SO4': 'H<sub>2</sub>SO<sub>4</sub>',
+		'&lt;!--': '<!--',
+		'--&gt;': '-->'
+	}
 
-	for key in substitutions.keys():
-		text = text.replace(key, substitutions[key])
+	reg_substitutions = {
+		(r'&lt;(|/)(i|b|sup|sub)&gt;',): (r'<\1\2>',),  # simple tags
+		(r'(m|g|ha| L)-1',): (r'\1<sup>-1</sup>',),  # inverse units
+		(r'(\d\.\d+ ?\n?(x|&#215;)\n? ?10)(-?\d+)',): (r'\1<sup>\3</sup>',), # scientific notation
+		(r'-\n ?',): (r'-',),  # extra whitespace in hyphenations
+		(r'(LC|LD|IC)50',): (r'\1<sub>50</sub>',),  # 50-doses
+		(r'([A-Z]|\d)O(\d)(\d?(\+|-|))',): (r'\1O<sub>\2</sub><sup>\3</sup>',),  # Bi-elemental oxygen compounds
+		(r'/(cm|km|m)(\d)',): (r'/\1<sup>\2</sup>',),  # metre-based units
+		(r'NH(\d)(\+?)',): (r'NH<sub>\1</sub><sup>\2</sup>',), # Ammonia-based compounds
+	}
+
+	# Replace all above simple text matches
+	for key in txt_substitutions.keys():
+		text = text.replace(key, txt_substitutions[key])
+
+	# Replace all the above regex patterns
+	for key in reg_substitutions.keys():
+		text = re.sub(key[0], reg_substitutions[key][0], text, re.IGNORECASE)
+
+	# Remove any empty tags (a few may be added during the above loops)
+	text = re.sub(r'<(i|b|sup|sub)><\/\1>', '', text, re.IGNORECASE)
 
 	return text
 
@@ -622,7 +587,7 @@ for filename in os.listdir(filepath):
 			if (lines[i].strip().startswith("<copyright") and
 					lines[i].strip().endswith("</copyright>")):
 				if (copyright != "default"):
-					lines[i] = "  <copyright>" + copyright + "</copyright>"
+					lines[i] = f"  <copyright>Copyright {inf_year} - {copyright}</copyright>"
 				else:
 					lines[i] = "  <copyright>Copyright " + inf_year + " - " + \
 							   lines[i][lines[i].find("<copyright>")+11:-12] +\
@@ -661,9 +626,6 @@ for filename in os.listdir(filepath):
 
 		# Remove superfluous whitespace at hyphenated line breaks
 		body = remove_terminal_hyphen_space(body)
-
-		# Exponentiate any bare scientific notation
-		body = fix_scientific_notation(body)
 
 		# Write processed lines back to the file
 		f = open(filepath + filename, "w")
