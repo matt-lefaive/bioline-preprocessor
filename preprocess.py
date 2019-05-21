@@ -1,6 +1,7 @@
 import os
 import re
 from species_link import insertSpeciesLinks
+from colours import colours
 
 # Global variables. inf prefixe stands for 'inferred'
 inf_year = ""
@@ -191,18 +192,17 @@ def surround_headers(text, front, special_front, back):
 	:param back: the closing format tag
 	:returns: text with format tags applied to the headers in it
 	"""
-	intro_headers = ["background:", "Background:", "Background\n", "Context:",
-					 "Introduction:", "Introduction\n"]
+	intro_headers = ["background:", "Background:", "Background\n", "Context:", "Introduction:", "Introduction\n", 'BACKGROUND']
 	common_headers = ["materials and methods:", "Materials and methods:",
 					  "Materials and Methods:", "result:", "results:",
 					  "Result:", "Results:", "Results\n", "conclusion:",
 					  "conclusions:", "Conclusion:", "Conclusions:",
-					  "Conclusions\n", "Objective:", "Objectives:",
+					  "Conclusions\n", "Objective:", "Objectives:", 'OBJECTIVES',
 					  "Discussion:", "Discussions:", "Antecedente:",
 					  "Objetivo:", "M&#233;todos:", "Resultados:",
-					  "Conclusiones:", "Aim", "Aims"]
+					  "Conclusiones:", "Aim", "Aims", 'FINDINGS', 'MAIN CONCLUSION', 'RESULTS']
 	method_headers = ["methods:", "method:", "Methods:", "Method:",
-					  "Methods\n", "Methodology:"]
+					  "Methods\n", "Methodology:", 'METHODS']
 
 	for header in intro_headers + common_headers + method_headers:
 		# If not an intro header
@@ -273,7 +273,7 @@ def print_discrepancy_report(d, disc_type):
 	:returns: None
 	"""
 
-	print("Journal " + disc_type + " discrepancies:")
+	print(f'{colours.RED}Journal {disc_type} discrepancies:{colours.ENDC}')
 	proper_values = {"number": inf_number, "year": inf_year,
 					 "volume": inf_volume}
 	expected = proper_values[disc_type]
@@ -283,7 +283,7 @@ def print_discrepancy_report(d, disc_type):
 		if d[key] != expected:
 			problems[key] = d[key]
 	for key in problems.keys():
-		print(key + ": Expected " + disc_type + "=\"" + str(expected) +
+		print('    ' + key + ": Expected " + disc_type + "=\"" + str(expected) +
 			  "\" but got " + disc_type + "=\"" + problems[key] + "\"")
 	print("")
 	return problems
@@ -408,7 +408,7 @@ def fix_discrepencies(files, directory_path, disc_type, expected):
 
 	# Loop through each file that needs fixing
 	for filename in files.keys():
-		print("... Fixing " + filename)
+		print("    Fixing " + filename + "...")
 
 		# read in file contents
 		f = open(directory_path + filename, "r")
@@ -482,6 +482,19 @@ def extract_implicit_info(path):
 		return (inf_volume, inf_number, year, inf_journal_code)
 
 
+def bval(b):
+	b = b.lower()
+	if b in ['y', 'yes', 'true']:
+		return True
+	else:
+		return False
+
+def save_config(config):
+	config_f = open(f'./config/{inf_journal_code}.config', 'w')
+	for key in config.keys():
+		config_f.writeline(key + '=' + str(config[key]))
+	config_f.close()
+
 # MAIN CODE #
 # Get the file path of the /xml folder and appropriately format it
 filepath = input("Enter path to xml folder to process: ")
@@ -494,26 +507,83 @@ if not re.match(r'.*\/[a-z]{2}\d+\(.+\)\/xml\/$', filepath):
 	print("Error in filepath. Filepath should look like C:/.../jjvv(n)/xml")
 	exit()
 
-# Get various other parameters about what to change
-copyright = input("Enter the journal copyright (or \"default\" to leave it as is): ")
-textSubs = input("Autoformat common words? (y/n): ").lower()
-addNewLine = input("Add newlines before results, method, conclusions, etc.? (y/n): ").lower()
-boldHeaders = input("Make background, methods, results, etc. bold? (y/n): ").lower()
-italicHeaders = "n"
-if (boldHeaders == "n"):
-	italicHeaders = input("Make background, methods, results, etc. italicized? (y/n): ").lower()
-speciesLinks = input("Automatically attempt to insert species links? (y/n): ").lower()
+# Determine volume, year, issue, and number based on the path to the xml folder
+(inf_volume, inf_number, inf_year, inf_journal_code) = extract_implicit_info(filepath)
+
+# Declare variables read in from config files
+copyright = 'default'
+textSubs = False
+before_newline_count = 0
+after_newline_count = 0
+boldHeaders = False
+italicHeaders = False
+speciesLinks = False
+
+
+try:
+	# Read in the data from the config file if it exists
+	config_f = open(f'./config/{inf_journal_code}.config', 'r')
+
+	print(f'Loading configuration for \'{inf_journal_code}\'...\n')
+	for line in config_f.readlines():
+		tokens = line.split('=')
+		tokens = [t.strip() for t in tokens]
+		if tokens[0] == 'COPYRIGHT':
+			copyright = tokens[1]
+		elif tokens[0] == 'TEXTSUBS':
+			textSubs = bval(tokens[1])
+		elif tokens[0] == 'NEWLINESBEFORE':
+			before_newline_count = int(tokens[1])
+		elif tokens[0] == 'NEWLINESAFTER':
+			after_newline_count = int(tokens[1])
+		elif tokens[0] == 'BOLD':
+			boldHeaders = bval(tokens[1])
+		elif tokens[0] == 'ITALIC':
+			italicHeaders = bval(tokens[1])
+		elif tokens[0] == 'SPECIESLINKS':
+			speciesLinks = bval(tokens[1])
+		elif len(tokens[0]) > 0: #UNKNOWN TOKEN
+			print(f'{colours.RED}UNKNOWN TOKEN (ERR 001):{colours.ENDC}: Unknown token \'{tokens[0]}\' in file \'{inf_journal_code}.config\'')
+			exit()
+
+except FileNotFoundError:
+	# Manually retrieve config values from user
+
+	copyright = input("Enter the journal copyright (or \"default\" if unsure): ")
+	textSubs = bval(input("Auto-format common words? (y/n): "))
+	addNewLine = bval(input("Add newlines before abstract section headers? (y/n): "))
+	if (addNewLine):
+		before_newline_count = int(input("How many? "))
+	addNewLine = bval(input("Add newlines after abstract section headers? (y/n): "))
+	if (addNewLine):
+		after_newline_count = int(input("How many? "))
+	boldHeaders = bval(input("Bold abstract headers? (y/n): "))
+	italicHeaders = bval(input("Italic abstract headers? (y/n): "))
+	speciesLinks = bval(input("Attempt to automatically insert species links? (y/n): "))
+	
+	# Save configuration for later reuse if desired
+	save = bval(input(f'Save this configuration for {inf_journal_code}? (y/n)'))
+	if (save):
+		config = {
+			'COPYRIGHT': copyright,
+			'TEXTSUBS': textSubs,
+			'NEWLINESBEFORE': before_newline_count,
+			'NEWLINESAFTER': after_newline_count,
+			'BOLD': boldHeaders,
+			'ITALIC': italicHeaders,
+			'SPECIESLINKS': speciesLinks
+		}
+		save_config(config)
+		print(f'{colours.GREEN}Configuration saved!{colours.ENDC}')
 
 # Define dictionaries to search for discrepancies
 file_to_volume = dict()
 file_to_number = dict()
 file_to_year = dict()
 
-# Determine volume, year, issue, and number based on the path to the xml folder
-(inf_volume, inf_number,
- inf_year, inf_journal_code) = extract_implicit_info(filepath)
 
-print("\nPerforming preprocessing...\n------------------------")
+
+print(f'{colours.YELLOW}Starting XML processing{colours.ENDC}')
 # Loop through each xml file in the directory
 for filename in os.listdir(filepath):
 	if filename.endswith(".xml"):
@@ -533,7 +603,7 @@ for filename in os.listdir(filepath):
 			continue
 
 		# Replace id="JJxxx" with appropriate values
-		print("Processing " + filename + "...")
+		print("    Processing " + filename + "...")
 		lines[0] = set_article_id(filename, lines[0])
 
 		# Fix redundant page numbers if possible
@@ -586,21 +656,17 @@ for filename in os.listdir(filepath):
 		body = "\n".join(lines)
 
 		# Add linebreaks, italics, and bolds to common abstract sections
-		if (addNewLine == "y"):
-			if (boldHeaders == "y"):
-				body = surround_headers(body, "<br/><b>", "<b>", "</b>")
-			elif (italicHeaders == "y"):
-				body = surround_headers(body, "<br/><i>", "<i>", "</i>")
-			else:
-				body = surround_headers(body, "<br/>", "", "")
-		else:
-			if (boldHeaders == "y"):
-				body = surround_headers(body, "<b>", "<b>", "</b>")
-			elif (italicHeaders == "y"):
-				body = surround_headers(body, "<i>", "<i>", "</i>")
+		if (boldHeaders and italicHeaders):
+			body = surround_headers(body, '<br/>' * before_newline_count + '<b><i>', '<b><i>', '</i></b>' + '<br/>' * after_newline_count)
+		elif boldHeaders:
+			body = surround_headers(body, '<br/>' * before_newline_count + '<b>', '<b>', '</b>' + '<br/>' * after_newline_count)
+		elif italicHeaders:
+			body = surround_headers(body, '<br/>' * before_newline_count + '<i>', '<i>', '</i>' + '<br/>' * after_newline_count)
+		elif newline_count > 0:
+			body = surround_headers(body, '<br/>' * before_newline_count, '', '<br/>' * after_newline_count)
 
 		# Perform common textual substitutions
-		if (textSubs == "y"):
+		if (textSubs):
 			body = common_text_subs(body)
 
 		# Add species links if the user requested it
@@ -618,13 +684,13 @@ for filename in os.listdir(filepath):
 		f.write(body)
 		f.close()
 
-print("Done preprocessing!\n")
-print("Generating proofing file...\n------------------------")
+print(f"    {colours.GREEN}Completed XML processing!{colours.ENDC}")
+print(f"\n{colours.YELLOW}Generating proofing file{colours.ENDC}")
 write_problems_file(filepath + "../" + inf_journal_code + inf_volume + "(" +
 					inf_number + ") Problems.txt", file_to_volume)
-print("Proofing file generated!\n")
+print(f"    {colours.GREEN}Proofing file generated!{colours.ENDC}")
 
-print("Performing Discrepancy Analysis...\n------------------------")
+print(f"\n{colours.YELLOW}Performing Discrepancy Analysis{colours.ENDC}")
 
 # Fix any problems with volume numbers (if so desired by user)
 confirmation = "Would you like to automatically fix these problems? (y/n): "
@@ -646,5 +712,4 @@ if exists_discrepencies(file_to_year, inf_year):
 	if input(confirmation).lower() == "y":
 		fix_discrepencies(problems, filepath, "year", inf_year)
 
-print("""Discrepancies resolved!\n
-		 Please proceed to manual processing of each file.""")
+print(f'    {colours.GREEN}Discrepancies resolved!{colours.ENDC}\n\nPlease proceed to manual processing of each file.')
