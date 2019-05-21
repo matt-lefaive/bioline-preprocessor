@@ -84,18 +84,6 @@ def set_index_id(filename, line):
 	return line[0:line.index("xxx<")-2] + filename[0:-4] + "</index>"
 
 
-def remove_terminal_hyphen_space(text):
-	"""
-	(str) -> str
-	Removes the newline character and any whitespace between the 1st half
-	of a hyphenated word and the 2nd half on the next line.
-
-	:param text: text from which to remove hyphen space
-	:returns: text with unnecessary hyphenated space removed
-	"""
-	return re.sub(r'-\n ?', '-', text)
-
-
 
 def common_text_subs(text):
 	"""
@@ -402,11 +390,16 @@ def extract_implicit_info(path):
 
 
 def bval(b):
+	'''
+	(str) -> bool
+	Converts a string to boolean with custom truth-words
+
+	:param b: string to be made into a bool
+	:returns: truth value of the string passed in
+	'''
 	b = b.lower()
-	if b in ['y', 'yes', 'true']:
-		return True
-	else:
-		return False
+	return b in ['y', 'yes', 'true']:
+
 
 def save_config(config):
 	config_f = open(f'./config/{inf_journal_code}.config', 'w')
@@ -623,9 +616,6 @@ for filename in os.listdir(filepath):
 		# Add species links if the user requested it
 		if speciesLinks:
 			body = insertSpeciesLinks(body)
-
-		# Remove superfluous whitespace at hyphenated line breaks
-		body = remove_terminal_hyphen_space(body)
 
 		# Write processed lines back to the file
 		f = open(filepath + filename, "w")
