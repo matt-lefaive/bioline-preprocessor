@@ -492,7 +492,7 @@ def bval(b):
 def save_config(config):
 	config_f = open(f'./config/{inf_journal_code}.config', 'w')
 	for key in config.keys():
-		config_f.writeline(key + '=' + str(config[key]))
+		config_f.write(key + '=' + str(config[key]) + '\n' * (0 if key == 'SPECIESLINKS' else 1))
 	config_f.close()
 
 # MAIN CODE #
@@ -550,19 +550,19 @@ except FileNotFoundError:
 	# Manually retrieve config values from user
 
 	copyright = input("Enter the journal copyright (or \"default\" if unsure): ")
-	textSubs = bval(input("Auto-format common words? (y/n): "))
-	addNewLine = bval(input("Add newlines before abstract section headers? (y/n): "))
+	textSubs = bval(input(f"Auto-format common words? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
+	addNewLine = bval(input(f"Add newlines before abstract section headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
 	if (addNewLine):
 		before_newline_count = int(input("How many? "))
-	addNewLine = bval(input("Add newlines after abstract section headers? (y/n): "))
+	addNewLine = bval(input(f"Add newlines after abstract section headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
 	if (addNewLine):
 		after_newline_count = int(input("How many? "))
-	boldHeaders = bval(input("Bold abstract headers? (y/n): "))
-	italicHeaders = bval(input("Italic abstract headers? (y/n): "))
-	speciesLinks = bval(input("Attempt to automatically insert species links? (y/n): "))
+	boldHeaders = bval(input(f"Bold abstract headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
+	italicHeaders = bval(input(f"Italic abstract headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
+	speciesLinks = bval(input(f"Attempt to automatically insert species links? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "))
 	
 	# Save configuration for later reuse if desired
-	save = bval(input(f'Save this configuration for {inf_journal_code}? (y/n)'))
+	save = bval(input(f'Save this configuration for {inf_journal_code}? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): '))
 	if (save):
 		config = {
 			'COPYRIGHT': copyright,
@@ -574,7 +574,7 @@ except FileNotFoundError:
 			'SPECIESLINKS': speciesLinks
 		}
 		save_config(config)
-		print(f'{colours.GREEN}Configuration saved!{colours.ENDC}')
+		print(f'    {colours.GREEN}Configuration saved!{colours.ENDC}\n')
 
 # Define dictionaries to search for discrepancies
 file_to_volume = dict()
@@ -662,7 +662,7 @@ for filename in os.listdir(filepath):
 			body = surround_headers(body, '<br/>' * before_newline_count + '<b>', '<b>', '</b>' + '<br/>' * after_newline_count)
 		elif italicHeaders:
 			body = surround_headers(body, '<br/>' * before_newline_count + '<i>', '<i>', '</i>' + '<br/>' * after_newline_count)
-		elif newline_count > 0:
+		elif before_newline_count > 0:
 			body = surround_headers(body, '<br/>' * before_newline_count, '', '<br/>' * after_newline_count)
 
 		# Perform common textual substitutions
@@ -693,7 +693,7 @@ print(f"    {colours.GREEN}Proofing file generated!{colours.ENDC}")
 print(f"\n{colours.YELLOW}Performing Discrepancy Analysis{colours.ENDC}")
 
 # Fix any problems with volume numbers (if so desired by user)
-confirmation = "Would you like to automatically fix these problems? (y/n): "
+confirmation = f"Would you like to automatically fix these problems? {colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}: "
 
 if exists_discrepencies(file_to_volume, inf_volume):
 	problems = print_discrepancy_report(file_to_volume, "volume")
