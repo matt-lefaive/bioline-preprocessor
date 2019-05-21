@@ -1,4 +1,8 @@
 *Ananas sativa
+*Eleucine indica
+*Eudrilus eugeniae
+*Irvingia gabomensis
+*Luffa cylindrical
 *Okoubaka aubrevillie
 *Poincianella pyramidalis
 Abies holophylla
@@ -11,13 +15,17 @@ Acalypha cuspidata
 Acanthospermum hispidum
 Adansonia digitata
 Adenanthos sericeus
+Afzelia africana
 Ailanthus excelsa
 Albizia lebbeck
 Allium cepa
 Alloispermum integrifolium
 Aloe barbadensis
 Alstonia boonei
+Amaranthus dubius
 Amaranthus spinosus
+Amaranthus viridis
+Anisophyllea laurina
 Annona muricata
 Anthocleista vogelii
 Antiaris africana
@@ -56,18 +64,23 @@ Bursera aptera
 Cajanus cajan
 Calliandra brevipes
 Callinectes amnicola
+Callinectes sapidus
 Callosobruchus maculatus
 Calophyllum brasiliense
 Calotropis procera
 Camellia oleifera
 Camellia sinensis
+Campylobacter jejuni
 Cananga odorata
 Candida albicans
+Candida krusei
 Candida parapsilosis
+Candida tropicalis
 Capsicum annum
 Capsicum frutescens
 Cardiosoma armatum
 Carica papaya
+Carpolobia lutea
 Caylusea hexagyna
 Cedrela odorata
 Centaurea aegyptiaca
@@ -144,6 +157,7 @@ Holarrhena floribunda
 Hymenocarida acida
 Hypsipyla grandella
 Ilex paraguariensis
+Ipomoea asarifolia
 Ipomoea batatas
 Iris germanica
 Jatropha curcas
@@ -163,6 +177,7 @@ Lasius niger
 Lentinus Squarrosulus
 Leptadenia hastata
 Leucaena leucocephala
+Listeria monocytogenes
 Lumbricus terrestris
 Lupinus hispanicus
 Lupinus luteus
@@ -189,6 +204,7 @@ Monodora Myrstica
 Moringa oleifera
 Moringa peregrina
 Mugil cephalus
+Musa acuminata
 Musanga cercropioides
 Musca domestica
 Mycobacterium abscessus
@@ -217,6 +233,7 @@ Pentaclethra macrophylla
 Pentanisia prunelloides
 Periophthalmus papilio
 Phaseolus acutifolias
+Phaulopsis barteri
 Phyllanthus sellowianus
 Phylloxera devastatrix
 Phylloxera notabilis
@@ -236,6 +253,7 @@ Poecilia reticulata
 Portulaca oleracea
 Pouteria salicifolia
 Praomys tullbergi
+Prosopis africana
 Prosopis juliflora
 Proteus mirabilis
 Proteus vulgaris
@@ -275,6 +293,8 @@ Sebastiania schottiana
 Securidaca longepedunculata
 Senna didymobotrya
 Senna occidentalis
+Shigella dysenteriae
+Sida acuta
 Sideroxylon inerme
 Simarouba amara
 Sitotroga cerealella
@@ -285,6 +305,7 @@ Sphenostylis stenocarpa
 Spilanthes oleracea
 Staphylococcus aureus
 Staphylococcus epidermidis
+Staphylococcus saprophyticus
 Streptococcus faecalis
 Streptococcus mutans
 Streptococcus pyogenes
@@ -295,6 +316,7 @@ Swietenia macrophylla
 Tabebuia aurea
 Talinum portulacifolium
 Talinum triangulare
+Tapinanthus globiferus
 Tectona grandis
 Telfairia occidentalis
 Terminalia chebula
