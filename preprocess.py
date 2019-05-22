@@ -11,22 +11,6 @@ inf_number = ""
 inf_journal_code = ""
 
 
-def set_article_id(filename, line):
-	"""
-	(str, str) -> str
-	Sets the id attribute in the supplied line to the filename
-	i.e. id="jjxxx" becomes id="jj18001"
-
-	:param filename: name of the current xml file
-	:param line: line of text in xml file being processed
-	:returns: line with id set to filename
-	"""
-
-	new_line = "<article id=\"" + filename[0:-4] + "\" "
-	new_line += line[line.index("lang="):]
-	return new_line
-
-
 def remove_NA(line, tag):
 	"""
 	(str, str) -> str
@@ -106,14 +90,22 @@ def common_text_subs(text):
 	}
 
 	reg_substitutions = {
-		(r'&lt;(|/)(i|b|sup|sub)&gt;',): (r'<\1\2>',),  # simple tags
-		(r'(m|g|ha| L)-1',): (r'\1<sup>-1</sup>',),  # inverse units
-		(r'(\d\.\d+ ?\n?(x|&#215;)\n? ?10)(-?\d+)',): (r'\1<sup>\3</sup>',), # scientific notation
-		(r'-\n ?',): (r'-',),  # extra whitespace in hyphenations
-		(r'(LC|LD|IC)50',): (r'\1<sub>50</sub>',),  # 50-doses
-		(r'([A-Z]|\d)O(\d)(\d?(\+|-|))',): (r'\1O<sub>\2</sub><sup>\3</sup>',),  # Bi-elemental oxygen compounds
-		(r'/(cm|km|m)(\d)',): (r'/\1<sup>\2</sup>',),  # metre-based units
-		(r'NH(\d)(\+?)',): (r'NH<sub>\1</sub><sup>\2</sup>',), # Ammonia-based compounds
+		# simple tags
+		(r'&lt;(|/)(i|b|sup|sub)&gt;',): (r'<\1\2>',),
+		# inverse units  
+		(r'(m|g|ha| L)-1',): (r'\1<sup>-1</sup>',),
+		# scientific notation
+		(r'(\d\.\d+ ?\n?(x|&#215;)\n? ?10)(-?\d+)',): (r'\1<sup>\3</sup>',),
+		# extra whitespace in hyphenations
+		(r'-\n ?',): (r'-',),
+		# 50-doses
+		(r'(LC|LD|IC)50',): (r'\1<sub>50</sub>',),
+		# Bi-elemental oxygen compounds
+		(r'([A-Z]|\d)O(\d)(\d?(\+|-|))',): (r'\1O<sub>\2</sub><sup>\3</sup>',),
+		# metre-based units
+		(r'/(cm|km|m)(\d)',): (r'/\1<sup>\2</sup>',),
+		# Ammonia-based compounds
+		(r'NH(\d)(\+?)',): (r'NH<sub>\1</sub><sup>\2</sup>',),
 	}
 
 	# Replace all above simple text matches
@@ -397,8 +389,7 @@ def bval(b):
 	:param b: string to be made into a bool
 	:returns: truth value of the string passed in
 	'''
-	b = b.lower()
-	return b in ['y', 'yes', 'true']:
+	return b.lower() in ['y', 'yes', 'true']
 
 
 def save_config(config):
@@ -548,7 +539,8 @@ for filename in os.listdir(filepath):
 
 		# Replace id="JJxxx" with appropriate values
 		print("    Processing " + filename + "...")
-		lines[0] = set_article_id(filename, lines[0])
+		lines[0] = xml.set_attribute('id', filename[0:-4], lines[0])
+		#lines[0] = set_article_id(filename, lines[0])
 
 		# Fix redundant page numbers if possible
 		lines[0] = fix_redundant_page_numbers(lines[0])
