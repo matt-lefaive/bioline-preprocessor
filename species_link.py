@@ -11,12 +11,10 @@ try:
             view = self.view
             for region in view.sel():
                 if not region.empty():
-                    # If a species link was highlighted, revert it to it's
-                    # non-linked form
+                    # If a species link was highlighted, revert it to it's non-linked form
                     if is_species_link(view.substr(region)):
                         view.replace(edit, region, remove_species_link(view.substr(region)))
-                    # Otherwise, a species was highlighted, so insert a link
-                    # for it
+                    # Otherwise, a species was highlighted, so insert a link for it
                     else:
                         view.replace(edit, region, get_species_link(view.substr(region)))
 except ImportError:
@@ -80,7 +78,6 @@ def insertSpeciesLinks(text):
 
             matches = []
             short_matches = []
-            genus_matches = []
             shortform = ''
             parts = species.split(' ')
 
