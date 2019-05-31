@@ -4,6 +4,9 @@ from species_link import insertSpeciesLinks
 from colours import colours
 from xml import xml
 
+# Constants
+YESNO = f'({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC})'
+
 # Global variables. inf prefixe stands for 'inferred'
 inf_year = ""
 inf_volume = ""
@@ -393,15 +396,27 @@ def bval(b):
 
 
 def save_config(config):
+	'''
+	(dict) -> None
+	Writes a journal configuration out to a .config file
+
+	:param config: dict of config tokens to values
+	'''
 	config_f = open(f'./config/{inf_journal_code}.config', 'w')
 	for key in config.keys():
 		config_f.write(key + '=' + str(config[key]) + '\n' * (0 if key == 'SPECIESLINKS' else 1))
 	config_f.close()
 
+
 def get_input(message, input_type):
 	'''
+	(str, str) -> str or int or bool
+	Repeatedly prompts user for input, displaying message, and returning user input
+	converted to type input_type.
 
+	:param message: message to display in input() prompt
 	:param type: 's' -> str, 'i' -> int, 'b' -> bool
+	:returns: valid input of type input_type
 	'''
 	input_type = input_type.lower()
 	valid_input = False
@@ -431,15 +446,14 @@ def get_input(message, input_type):
 
 # MAIN CODE #
 # Get the file path of the /xml folder and appropriately format it
-filepath = get_input("Enter path to xml folder to process: ", 's')
-filepath = filepath.replace("\\", "/")
+filepath = get_input("Enter path to xml folder to process: ", 's').replace('\\', '/')
 if not filepath.endswith("/"):
 	filepath += "/"
 
 # Make sure path meets the pattern: .../jjv(n)/xml/
 if not re.match(r'.*\/[a-z]{2}\d+\(.+\)\/xml\/$', filepath):
 	print(f"{colours.RED}FILEPATH FORMAT ERROR (ERR 002):{colours.ENDC}" + \
-		"Filepath should end with /jjvv(n)/xml (matching regex .*\/[a-z]{2}\d+\(.+\)\/xml\/$)")
+		" Filepath should end with /jjvv(n)/xml (regex .*\/[a-z]{2}\d+\(.+\)\/xml\/$)")
 	exit()
 
 # Determine volume, year, issue, and number based on the path to the xml folder
@@ -454,15 +468,13 @@ boldHeaders = False
 italicHeaders = False
 speciesLinks = False
 
-
 try:
 	# Read in the data from the config file if it exists
 	config_f = open(f'./config/{inf_journal_code}.config', 'r')
 
 	print(f'Loading configuration for \'{inf_journal_code}\'...\n')
 	for line in config_f.readlines():
-		tokens = line.split('=')
-		tokens = [t.strip() for t in tokens]
+		tokens = [t.strip() for t in line.split('=')]
 		if tokens[0] == 'COPYRIGHT':
 			copyright = tokens[1]
 		elif tokens[0] == 'TEXTSUBS':
@@ -485,19 +497,19 @@ except FileNotFoundError:
 	# Manually retrieve config values from user
 
 	copyright = get_input("Enter the journal copyright (or \"default\" if unsure): ", 's')
-	textSubs = get_input(f"Auto-format common words? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
-	addNewLine = get_input(f"Add newlines before abstract section headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
+	textSubs = get_input(f"Auto-format common words? {YESNO}: ", 'b')
+	addNewLine = get_input(f"Add newlines before abstract section headers? {YESNO}: ", 'b')
 	if (addNewLine):
 		before_newline_count = get_input("How many? ", 'i')
-	addNewLine = get_input(f"Add newlines after abstract section headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
+	addNewLine = get_input(f"Add newlines after abstract section headers? {YESNO}: ", 'b')
 	if (addNewLine):
 		after_newline_count = get_input("How many? ", 'i')
-	boldHeaders = get_input(f"Bold abstract headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
-	italicHeaders = get_input(f"Italic abstract headers? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
-	speciesLinks = get_input(f"Attempt to automatically insert species links? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ", 'b')
+	boldHeaders = get_input(f"Bold abstract headers? {YESNO}: ", 'b')
+	italicHeaders = get_input(f"Italic abstract headers? {YESNO}: ", 'b')
+	speciesLinks = get_input(f"Attempt to automatically insert species links? {YESNO}: ", 'b')
 	
 	# Save configuration for later reuse if desired
-	save = get_input(f'Save this configuration for {inf_journal_code}? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): ', 's')
+	save = get_input(f'Save this configuration for {inf_journal_code}? {YESNO}: ', 's')
 	if (save):
 		config = {
 			'COPYRIGHT': copyright,
@@ -515,8 +527,6 @@ except FileNotFoundError:
 file_to_volume = dict()
 file_to_number = dict()
 file_to_year = dict()
-
-
 
 print(f'{colours.YELLOW}Starting XML processing{colours.ENDC}')
 # Loop through each xml file in the directory
@@ -540,7 +550,6 @@ for filename in os.listdir(filepath):
 		# Replace id="JJxxx" with appropriate values
 		print("    Processing " + filename + "...")
 		lines[0] = xml.set_attribute('id', filename[0:-4], lines[0])
-		#lines[0] = set_article_id(filename, lines[0])
 
 		# Fix redundant page numbers if possible
 		lines[0] = fix_redundant_page_numbers(lines[0])
@@ -602,7 +611,7 @@ for filename in os.listdir(filepath):
 			body = surround_headers(body, '<br/>' * before_newline_count, '', '<br/>' * after_newline_count)
 
 		# Perform common textual substitutions
-		if (textSubs):
+		if textSubs:
 			body = common_text_subs(body)
 
 		# Add species links if the user requested it
@@ -623,7 +632,7 @@ print(f"    {colours.GREEN}Proofing file generated!{colours.ENDC}")
 print(f"\n{colours.YELLOW}Performing Discrepancy Analysis{colours.ENDC}")
 
 # Fix any problems with volume numbers (if so desired by user)
-confirmation = f"    Would you like to automatically fix these problems? ({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC}): "
+confirmation = f"    Would you like to automatically fix these problems? {YESNO}: "
 
 if exists_discrepencies(file_to_volume, inf_volume):
 	problems = print_discrepancy_report(file_to_volume, "volume")
