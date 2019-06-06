@@ -96,7 +96,7 @@ def common_text_subs(text):
 		# simple tags
 		(r'&lt;(|/)(i|b|sup|sub)&gt;',): (r'<\1\2>',),
 		# inverse units  
-		(r'(m|g|ha| L)-1',): (r'\1<sup>-1</sup>',),
+		(r'(m|g|ha| L|ml)-1',): (r'\1<sup>-1</sup>',),
 		# scientific notation
 		(r'(\d\.\d+ ?\n?(x|&#215;)\n? ?10)(-?\d+)',): (r'\1<sup>\3</sup>',),
 		# extra whitespace in hyphenations
@@ -109,6 +109,8 @@ def common_text_subs(text):
 		(r'/(cm|km|m)(\d)',): (r'/\1<sup>\2</sup>',),
 		# Ammonia-based compounds
 		(r'NH(\d)(\+?)',): (r'NH<sub>\1</sub><sup>\2</sup>',),
+		# Redundantly-escaped apostrophes
+		(r'\\?\\\'',): (r'\'',)
 	}
 
 	# Replace all above simple text matches
@@ -123,7 +125,7 @@ def common_text_subs(text):
 	text = re.sub(r'<(i|b|sup|sub)><\/\1>', '', text, re.IGNORECASE)
 
 	return text
-
+	
 
 def surround_headers(text, front, special_front, back):
 	"""
@@ -149,7 +151,7 @@ def surround_headers(text, front, special_front, back):
 					  "Conclusions\n", "Objective:", "Objectives:", 'OBJECTIVES',
 					  "Discussion:", "Discussions:", "Antecedente:",
 					  "Objetivo:", "M&#233;todos:", "Resultados:",
-					  "Conclusiones:", "Aim", "Aims", 'FINDINGS', 'MAIN CONCLUSION', 'RESULTS']
+					  "Conclusiones:", "Aim", "Aims", 'FINDINGS', 'MAIN CONCLUSION', 'MAIN CONCLUSIONS', 'RESULTS']
 	method_headers = ["methods:", "method:", "Methods:", "Method:",
 					  "Methods\n", "Methodology:", 'METHODS']
 
