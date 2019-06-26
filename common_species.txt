@@ -5,6 +5,7 @@
 *Eleucine indica
 *Eudrilus eugeniae
 *Irvingia gabomensis
+*Leishmania braziliensis
 *Luffa cylindrical
 *Okoubaka aubrevillie
 *Plasmodium falciparum
