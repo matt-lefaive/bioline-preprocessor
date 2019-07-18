@@ -144,15 +144,16 @@ def surround_headers(text, front, special_front, back):
 	:returns: text with format tags applied to the headers in it
 	"""
 	intro_headers = ["background:", "Background:", "Background\n", "Context:", "Introduction:", "Introduction\n", 'BACKGROUND']
-	common_headers = ["materials and methods:", "Materials and methods:",
-					  "Materials and Methods:", "result:", "results:",
+	common_headers = ["materials and methods:", "Materials and methods:", "Materials and Methods:", "Data and methods:", "Data Source &amp; Method:", "Data Source and Methods:",
+					  "result:", "results:",
 					  "Result:", "Results:", "Results\n", "conclusion:",
 					  "conclusions:", "Conclusion:", "Conclusions:",
 					  "Conclusions\n", "Objective:", "Objectives:", 'OBJECTIVES',
 					  "Discussion:", "Discussions:", "Antecedente:",
 					  "Objetivo:", "M&#233;todos:", "Resultados:",
-					  "Conclusiones:", "Aim", "Aims", 'FINDINGS', 'MAIN CONCLUSION', 'MAIN CONCLUSIONS', 'RESULTS']
-	method_headers = ["methods:", "method:", "Methods:", "Method:",
+					  "Objectif:", "M&#233;thodologie:", "R&#233;sultats:",
+					  "Conclusiones:", "Aim", "Aims", 'FINDINGS', 'Findings:', 'MAIN CONCLUSION', 'MAIN CONCLUSIONS', 'RESULTS']
+	method_headers = ["methods:", "method:", "Methods:", "Method:", "Method"
 					  "Methods\n", "Methodology:", 'METHODS']
 
 	for header in intro_headers + common_headers + method_headers:

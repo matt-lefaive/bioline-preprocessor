@@ -3,6 +3,8 @@
 *Ceasalpinia ferrea
 *Cornu ammonis
 *Eleucine indica
+*Eucalyptus grancam
+*Eucalyptus urograndis
 *Eudrilus eugeniae
 *Irvingia gabomensis
 *Leishmania braziliensis
@@ -11,6 +13,7 @@
 *Plasmodium falciparum
 *Plasmodium vivax
 *Poincianella pyramidalis
+*Schinus terebinthifolius
 *Schistosoma haematobium
 *Schistosoma mansoni
 *Triatoma pseudomaculata
@@ -34,6 +37,7 @@ Ailanthus excelsa
 Albizia lebbeck
 Allium cepa
 Alloispermum integrifolium
+Allophylus edulis
 Aloe barbadensis
 Alstonia boonei
 Amaranthus dubius
@@ -48,6 +52,7 @@ Aphania senegalensis
 Aproaerema modicella
 Apuleia leiocarpa
 Arachis hypogaea
+Arachis pintoi
 Araucaria angustifolia
 Aristolochia bracteolata
 Artemisia monosperma
@@ -80,6 +85,7 @@ Brosimum acutifolium
 Brucella abortus
 Bulbine abyssinica
 Bursera aptera
+Casearia sylvestris
 Cajanus cajan
 Calliandra brevipes
 Callinectes amnicola
@@ -102,6 +108,7 @@ Cardiosoma armatum
 Carica papaya
 Carpolobia lutea
 Caryedon serratus
+Cestrum strigilatum
 Caylusea hexagyna
 Cedrela odorata
 Centaurea aegyptiaca
@@ -110,6 +117,7 @@ Chenopodium quinoa
 Chromolaena odorata
 Chrysichthys nigrodigitatus
 Cimicifuga racemosa
+Cinnamomum zeylanicum
 Cissampelos mucronata
 Cissus quadrangularis
 Citrullus collocynthis
@@ -130,12 +138,15 @@ Combretum molle
 Corchorus olitorius
 Coriandrum sativum
 Costus speciosus
+Crax blumenbachii
 Criptocarenus diadematus
 Criptocarenus heveae
 Criptocarenus seriatus
 Cryptococcus neoformans
 Cryptolepis sanguinolenta
 Cucurbita maxima
+Cupania vernalis
+Cylindrocladium candelabrum
 Cymbopogon citratus
 Cynoglossus semilaevis
 Cyperus esculentus
@@ -169,6 +180,7 @@ Eucalyptus grandis
 Eucalyptus nicholii
 Eucalyptus saligna
 Eucalyptus urophylla
+Eugenia uniflora
 Eurycoma longifolia
 Euterpe edulis
 Fasciola hepatica
@@ -178,6 +190,7 @@ Glycine max
 Glycyrrhiza glabra
 Gongronema latifolium
 Grewia trichocarpa
+Guadua angustifolia
 Guibourtia coleosperma
 Gynaikothrips ficorum
 Handroanthus serratifolius
@@ -211,8 +224,10 @@ Lantana achyranthifolia
 Lasius niger
 Lentinus squarrosulus
 Leptadenia hastata
+Leptocybe invasa
 Leptospira interrogans
 Leucaena leucocephala
+Licania rigida
 Listeria monocytogenes
 Lumbricus terrestris
 Lupinus hispanicus
@@ -279,6 +294,7 @@ Phyllanthus sellowianus
 Phylloxera devastatrix
 Phylloxera notabilis
 Pinus eldarica
+Pinus elliottii
 Pinus koraiensis
 Pinus massoniana
 Pinus radiata
@@ -288,6 +304,7 @@ Piper gaudichaudianu
 Piper sarmentosum
 Pithecellobium dulce
 Plantago rugelii
+Plathymenia reticulata
 Plectranthus esculentus
 Pleurotus ostreatus
 Pleurotus pulmonarius
@@ -301,10 +318,13 @@ Prosopis africana
 Prosopis juliflora
 Proteus mirabilis
 Proteus vulgaris
+Prunus myrtifolia
 Pseudolmedia laevigata
 Pseudomonas alcaligenes
+Pseudomonas aeruginosa
 Pseudomonas putida
 Pseudopanax arboreus
+Psidium guajava
 Pteridium arachnoideum
 Pterocarpus angolensis
 Pterogyne nitens
@@ -345,10 +365,12 @@ Senna didymobotrya
 Senna occidentalis
 Shigella dysenteriae
 Sida acuta
+Sida rhombifolia
 Sideroxylon inerme
 Simarouba amara
 Sitotroga cerealella
 Solanum aethiopicum
+Solanum lycocarpum
 Solanum macrocarpon
 Solanum nigrum
 Sphenostylis stenocarpa
@@ -362,12 +384,17 @@ Streptococcus mutans
 Streptococcus pyogenes
 Streptomyces albus
 Strychnos spinosa
+Stylosanthes capitata
+Stylosanthes macrocephala
 Sudanonautes africanus
 Swietenia macrophylla
 Tabebuia aurea
+Tabebuia impetiginosa
+Tabebuia roseoalba
 Talinum portulacifolium
 Talinum triangulare
 Tapinanthus globiferus
+Tapirira guianensis
 Tectona grandis
 Telfairia occidentalis
 Terminalia chebula
@@ -388,6 +415,7 @@ Triplaris brasiliana
 Tripterygium wilfordii
 Uca tangeri
 Urginea maritima
+Urochloa decumbens
 Vernonia amygdalina
 Vernonia calvoana
 Vibrio cholerae
@@ -402,6 +430,7 @@ Xenopus laevis
 Xylopia aethiopica
 Zanthoxylum limonella
 Zanthoxylum rhetsa
+Zanthoxylum rhoifolium
 Zea mays
 Zilla spinosa
 Zingiber officinale
