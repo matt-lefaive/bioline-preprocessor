@@ -82,16 +82,18 @@ def common_text_subs(text):
 	:param text: text in which to replace unformatted words
 	:returns: text with proper xml format tags applied
 	"""
-	# Store the regexes a single-item tuples (so they'll work in the loop)
+	
 	txt_substitutions = {
 		'H2O2': 'H<sub>2</sub>O<sub>2</sub>',
 		'H2O': 'H<sub>2</sub>O',
 		'H20': 'H<sub>2</sub>0',
 		'H2SO4': 'H<sub>2</sub>SO<sub>4</sub>',
 		'&lt;!--': '<!--',
-		'--&gt;': '-->'
+		'--&gt;': '-->',
+		'\\\'': '\''
 	}
 
+	# Store the regexes as single-item tuples (so they'll work in the loop)
 	reg_substitutions = {
 		# simple tags
 		(r'&lt;(|/)(i|b|sup|sub)&gt;',): (r'<\1\2>',),
@@ -109,8 +111,6 @@ def common_text_subs(text):
 		(r'/(cm|km|m)(\d)',): (r'/\1<sup>\2</sup>',),
 		# Ammonia-based compounds
 		(r'NH(\d)(\+?)',): (r'NH<sub>\1</sub><sup>\2</sup>',),
-		# Redundantly-escaped apostrophes
-		(r'\\?\\\'',): (r'\'',)
 	}
 
 	# Replace all above simple text matches
@@ -143,7 +143,7 @@ def surround_headers(text, front, special_front, back):
 	:param back: the closing format tag
 	:returns: text with format tags applied to the headers in it
 	"""
-	intro_headers = ["background:", "Background:", "Background\n", "Context:", "Introduction:", "Introduction\n", 'BACKGROUND']
+	intro_headers = ["background:", "Background:", "Background\n", "Context:", "Introduction:", "Introduction\n", 'BACKGROUND', 'Purpose:']
 	common_headers = ["materials and methods:", "Materials and methods:", "Materials and Methods:", "Data and methods:", "Data Source &amp; Method:", "Data Source and Methods:",
 					  "result:", "results:",
 					  "Result:", "Results:", "Results\n", "conclusion:",
@@ -217,7 +217,7 @@ def print_discrepancy_report(d, disc_type):
 		if d[key] != expected:
 			problems[key] = d[key]
 	for key in problems.keys():
-		print('    ' + key + ": Expected " + disc_type + "=\"" + str(expected) +
+		print(key + ": Expected " + disc_type + "=\"" + str(expected) +
 			  "\" but got " + disc_type + "=\"" + problems[key] + "\"")
 	print("")
 	return problems
@@ -313,7 +313,7 @@ def fix_discrepencies(files, directory_path, disc_type, expected):
 
 	# Loop through each file that needs fixing
 	for filename in files.keys():
-		print("    Fixing " + filename + "...")
+		print("Fixing " + filename + "...")
 
 		# read in file contents
 		f = open(directory_path + filename, "r")
@@ -524,7 +524,7 @@ except FileNotFoundError:
 			'SPECIESLINKS': speciesLinks
 		}
 		save_config(config)
-		print(f'    {colours.GREEN}Configuration saved!{colours.ENDC}\n')
+		print(f'{colours.GREEN}Configuration saved!{colours.ENDC}\n')
 
 # Define dictionaries to search for discrepancies
 file_to_volume = dict()
@@ -547,11 +547,11 @@ for filename in os.listdir(filepath):
 		# Check if this file as already been processed
 		if not lines[0].strip().startswith("<article id=\"" + filename[0:2] +
 										   "xxx\""):
-			print("... Already processed " + filename)
+			print("Already processed " + filename + "...")
 			continue
 
 		# Replace id="JJxxx" with appropriate values
-		print("    Processing " + filename + "...")
+		print("Processing " + filename + "...")
 		lines[0] = xml.set_attribute('id', filename[0:-4], lines[0])
 
 		# Fix redundant page numbers if possible
@@ -626,11 +626,11 @@ for filename in os.listdir(filepath):
 		f.write(body)
 		f.close()
 
-print(f"    {colours.GREEN}Completed XML processing!{colours.ENDC}")
+print(f"{colours.GREEN}Completed XML processing!{colours.ENDC}")
 print(f"\n{colours.YELLOW}Generating proofing file{colours.ENDC}")
 write_problems_file(filepath + "../" + inf_journal_code + inf_volume + "(" +
 					inf_number + ") Problems.txt", file_to_volume)
-print(f"    {colours.GREEN}Proofing file generated!{colours.ENDC}")
+print(f"{colours.GREEN}Proofing file generated!{colours.ENDC}")
 
 print(f"\n{colours.YELLOW}Performing Discrepancy Analysis{colours.ENDC}")
 
@@ -654,4 +654,4 @@ if exists_discrepencies(file_to_year, inf_year):
 	if get_input(confirmation, 'b'):
 		fix_discrepencies(problems, filepath, "year", inf_year)
 
-print(f'    {colours.GREEN}Discrepancies resolved!{colours.ENDC}\n\nPlease proceed to manual processing of each file.')
+print(f'{colours.GREEN}Discrepancies resolved!{colours.ENDC}\n\nPlease proceed to manual processing of each file.')
