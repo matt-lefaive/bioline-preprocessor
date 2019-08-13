@@ -1,5 +1,6 @@
 import os
 import re
+from typing import List, Dict, Tuple, Union, Optional
 from species_link import insertSpeciesLinks
 from colours import colours
 from xml import xml
@@ -14,30 +15,8 @@ inf_number = ""
 inf_journal_code = ""
 
 
-def remove_NA(line, tag):
+def remove_NA_authors(lines: List[str]) -> None:
 	"""
-	(str, str) -> str
-	Removes n/a and its derivatives from tag specified by *tag*.
-
-	>>> remove_NA("<title>NA</title>", "title")
-	"<title></title>"
-
-	:param line: a line of text from an xml file
-	:param tag: the tag from which to remove n/a (& derivatives)
-	:returns: line with n/a (& derivatives) removed
-	"""
-
-	derivatives = ["na", "n/a", "none"]
-	for derivative in derivatives:
-		if (line.lower().endswith(">" + derivative + "</" + tag + ">")):
-			return line[0:line.index(">")+1] + "</" + tag + ">"
-	# There were no na derivatives. Return the line as is.
-	return line
-
-
-def remove_NA_authors(lines):
-	"""
-	([str,]) -> None
 	Removes NA from any of the <author> and <authors> tags if applicable.
 	Mutates the list of lines passed in.
 
@@ -57,27 +36,10 @@ def remove_NA_authors(lines):
 		lines[3] = "    <lastname/>"
 
 
-def set_index_id(filename, line):
+def common_text_subs(text: str) -> str:
 	"""
-	(str, str) -> str
-	Sets the last element of the <index> tag to the filename (minus extension
-	of course)
-
-	:param filename: name of xml file currently being processed
-	:param line: line of text from said xml file
-	:returns: <index> line with last element updated with the filename
-	"""
-
-	return line[0:line.index("xxx<")-2] + filename[0:-4] + "</index>"
-
-
-
-def common_text_subs(text):
-	"""
-	(str) -> str
-	Replaces words or sequences in abstract that predominantly require the
-	processor to manually format them with their most commonly formatted
-	variant.
+	Formats words that predominantly require the processor to manually format 
+	them with their most commonly formatted variant.
 
 	:param text: text in which to replace unformatted words
 	:returns: text with proper xml format tags applied
@@ -100,7 +62,7 @@ def common_text_subs(text):
 		# inverse units  
 		(r'(m|g|ha| L|ml)-1',): (r'\1<sup>-1</sup>',),
 		# scientific notation
-		(r'(\d\.\d+ ?\n?(x|&#215;)\n? ?10)(-?\d+)',): (r'\1<sup>\3</sup>',),
+		(r'(\d?\.?\d+ ?\n?(x|&#215;)\n? ?10)(-?\d+)',): (r'\1<sup>\3</sup>',),
 		# extra whitespace in hyphenations
 		(r'-\n ?',): (r'-',),
 		# 50-doses
@@ -127,9 +89,8 @@ def common_text_subs(text):
 	return text
 	
 
-def surround_headers(text, front, special_front, back):
+def surround_headers(text: str, front: str, special_front: str, back: str) -> str:
 	"""
-	(str, str, str, str) -> str
 	For a header in common_headers below, it is replaced by the sequence
 	(special_)front+header+back, thereby automatically applying bold, italics,
 	or linebreaks to the different sections within an abstract.
@@ -179,9 +140,8 @@ def surround_headers(text, front, special_front, back):
 
 
 
-def exists_discrepencies(d, expected):
+def exists_discrepencies(d: Dict[str, str], expected: str) -> bool:
 	"""
-	(dict {str: str}, str) -> bool
 	Returns True if any of the files (keys of d) maps to a value other than
 	expected. Returns False otherwise.
 
@@ -196,9 +156,8 @@ def exists_discrepencies(d, expected):
 	return False
 
 
-def print_discrepancy_report(d, disc_type):
+def print_discrepancy_report(d: Dict[str, str], disc_type: str) -> bool:
 	"""
-	(dict {str: str}, str) -> bool
 	Displays a message to the user listing all the errors found of type
 	disc_type as well as what the expected value should be.
 
@@ -223,83 +182,56 @@ def print_discrepancy_report(d, disc_type):
 	return problems
 
 
-def update_index_VN(line, VN, to_update):
-	"""
-	(str, str, str) -> str
-	Updates the Volume or Number in line with VN. If to_update == "V", updates
-	the Volume. If to_update == "N", updates the Number.
-
-	:param line: line containing Volume/Index to update
-	:param VN: new value for Volume/Index
-	:param to_update: whether Volume or Index is getting updated
-	:returns: line with Volume/Index set to VN
-	"""
+def update_index(line: str, to_update: str, article_id: Optional[str]=None) -> str:
 	spaces = 0
 	while(line[spaces] == ' '):
 		spaces += 1
 
-	tokens = line[spaces:].split(" ")
+	tokens = line[spaces:].split(' ')
 
-	# The third token is the one we need to update. But first must be split
-	tokens[2] = tokens[2].split("N")
-	components = [tokens[0], tokens[1], tokens[2][0], "N"+tokens[2][1],
-				  tokens[3]]
+	# Split the 3rd token in half
+	tokens[2] = tokens[2].split('N')
 
-	if to_update.upper() == 'V':
-		components[2] = 'V' + str(VN)
-	elif to_update.upper() == 'N':
-		components[3] = 'N' + str(VN)
+	# All together, our index has been split like so:
+	#           <index>year  JOURNAL    Volume        Number            ID</index>
+	components = [tokens[0], tokens[1], tokens[2][0], 'N'+tokens[2][1], tokens[3]]
 
-	line = ""
+	to_update = to_update.lower()
+	if to_update == 'y':   # Update year
+		components[0] = '<index>' + inf_year
+	elif to_update == 'v': # Update volume
+		components[2] = 'V' + inf_volume
+	elif to_update == 'n': # Update number
+		components[3] = 'N' + inf_number
+	elif to_update == 'i':
+		components[4] = article_id + '</index>'
+
+	line = ''
 	for i in range(len(components)):
 		line += components[i]
 		if i != 2 and i != 4:
-			line += " "
+			line += ' '
 
-	return spaces * " " + line
+	return spaces * ' ' + line
 
 
-def update_index_year(line):
+
+def fix_redundant_page_numbers(line: str) -> str:
 	"""
-	(str) -> str
-	Replaces the year in the <index> line with inf_year (global variable)
-
-	:param line: the line to update
-	:returns: line with year updated to inf_year
-	"""
-
-	spaces = 0
-	while(line[spaces] == ' '):
-		spaces += 1
-
-	tokens = line[spaces:].split(" ")
-
-	# The first token, <index>YYYY, is the one we need to change
-	tokens[0] = "<index>" + inf_year
-
-	# Return the line put back together
-	return spaces * " " + " ".join(tokens)
-
-
-def fix_redundant_page_numbers(line):
-	"""
-	(str) -> str
 	Replaces redunant page numbering (of the form pages="x-x") with
 	the simplified version (pages="x")
-
 	:param line: line containing pages attribute to fix
 	:returns: line with redundant page numbering removed
 	"""
 
-	pages = xml.get_attribute(line, "pages")
+	pages = xml.get_attribute("pages", line)
 	if (re.match(r'(\d+)-\1$', pages)):
 		line = xml.set_attribute("pages", pages[:pages.index("-")], line)
 	return line
 
 
-def fix_discrepencies(files, directory_path, disc_type, expected):
+def fix_discrepencies(files: Dict[str, str], directory_path: str, disc_type: str, expected: str) -> None:
 	"""
-	(dict {str: str}, str, str, str) -> None
 	For each file in files, the incorrect attribute (disc_type) is updated
 	with the correct value (expected).
 
@@ -327,10 +259,10 @@ def fix_discrepencies(files, directory_path, disc_type, expected):
 		# tag
 		if disc_type == "volume" or disc_type == "number":
 			# Locate the index line. Should always be 3rd last line
-			lines[-3] = update_index_VN(lines[-3], expected, disc_type[0])
+			lines[-3] = update_index(lines[-3], disc_type[0])
 		# If the year was updated, we also need to change the index tag
 		if disc_type == "year":
-			lines[-3] = update_index_year(lines[-3])
+			lines[-3] = update_index(lines[-3], 'y')
 
 		# Rejoin all lines on newline and write to file
 		body = "\n".join(lines)
@@ -340,9 +272,8 @@ def fix_discrepencies(files, directory_path, disc_type, expected):
 	print("")
 
 
-def write_problems_file(path, files):
+def write_problems_file(path: str, files: Dict[str, str]) -> None:
 	"""
-	(str, {str->str}) -> Null
 	Generates proofing file to be filled out by Proofing Student.
 
 	:param path: the path (including name) of the proofing file
@@ -359,7 +290,7 @@ def write_problems_file(path, files):
 	f.close()
 
 
-def extract_implicit_info(path):
+def extract_implicit_info(path: str) -> Tuple[str, str, str, str]:
 	"""
 	(str) -> (str, str, str, str)
 	Returns the volume, number, year, and journal code for this particular
@@ -375,7 +306,7 @@ def extract_implicit_info(path):
 	folder = folder[folder.rindex("/")+1:]
 
 	# Pull out the journal code, volume, and issue
-	inf_journal_code = folder[0:2]
+	inf_journal_code = folder[0:2].lower()
 	inf_volume = folder[2:folder.index("(")]
 	inf_number = folder[folder.index("(")+1:folder.index(")")]
 
@@ -387,9 +318,8 @@ def extract_implicit_info(path):
 		return (inf_volume, inf_number, year, inf_journal_code)
 
 
-def bval(b):
+def bval(b: str) -> bool:
 	'''
-	(str) -> bool
 	Converts a string to boolean with custom truth-words
 
 	:param b: string to be made into a bool
@@ -398,9 +328,8 @@ def bval(b):
 	return b.lower() in ['y', 'yes', 'true']
 
 
-def save_config(config):
+def save_config(config: Dict[str, Union[str, bool, int]]) -> None:
 	'''
-	(dict) -> None
 	Writes a journal configuration out to a .config file
 
 	:param config: dict of config tokens to values
@@ -411,7 +340,7 @@ def save_config(config):
 	config_f.close()
 
 
-def get_input(message, input_type):
+def get_input(message: str, input_type: str) -> Union[str, int, bool]:
 	'''
 	(str, str) -> str or int or bool
 	Repeatedly prompts user for input, displaying message, and returning user input
@@ -545,8 +474,7 @@ for filename in os.listdir(filepath):
 		# NB: LINE 0 IS ALWAYS THE <abstract> LINE IN A BIOLINE XML!
 
 		# Check if this file as already been processed
-		if not lines[0].strip().startswith("<article id=\"" + filename[0:2] +
-										   "xxx\""):
+		if not lines[0].strip().startswith("<article id=\"" + filename[0:2] + "xxx\""):
 			print("Already processed " + filename + "...")
 			continue
 
@@ -558,9 +486,9 @@ for filename in os.listdir(filepath):
 		lines[0] = fix_redundant_page_numbers(lines[0])
 
 		# Add elements to our discrepancy dictionaries
-		file_to_volume[filename] = xml.get_attribute(lines[0], "volume")
-		file_to_number[filename] = xml.get_attribute(lines[0], "number")
-		file_to_year[filename] = xml.get_attribute(lines[0], "year")
+		file_to_volume[filename] = xml.get_attribute('volume', lines[0])
+		file_to_number[filename] = xml.get_attribute('number', lines[0])
+		file_to_year[filename] = xml.get_attribute('year', lines[0])
 
 		# Remove NA from authors if applicable
 		remove_NA_authors(lines)
@@ -569,36 +497,23 @@ for filename in os.listdir(filepath):
 		for i in range(len(lines)):
 
 			# Replace NA titles if applicable
-			if lines[i].strip().startswith("<title"):
-				lines[i] = remove_NA(lines[i], "title")
-
-			# Replace NA keywords if applicable
-			elif lines[i].strip().startswith("<keyword"):
-				lines[i] = remove_NA(lines[i], "keyword")
-
-			# Replace NA abstracts if applicable
-			elif lines[i].strip().startswith("<abstract"):
-				lines[i] = remove_NA(lines[i], "abstract")
+			if lines[i].strip().startswith('<title') or lines[i].strip().startswith('<abstract') or lines[i].strip().startswith('<keyword'):
+				lines[i] = xml.remove_NA(lines[i])
 
 			# Replace copyright if applicable
-			if (lines[i].strip().startswith("<copyright") and
-					lines[i].strip().endswith("</copyright>")):
+			if xml.get_tag(lines[i]) == 'copyright':
 				if (copyright != "default"):
 					lines[i] = f"  <copyright>Copyright {inf_year} - {copyright}</copyright>"
 				else:
-					lines[i] = "  <copyright>Copyright " + inf_year + " - " + \
-							   lines[i][lines[i].find("<copyright>")+11:-12] +\
-							   "</copyright>"
+					lines[i] = f'  <copyright>Copyright {inf_year} - {lines[i][lines[i].find("<copyright>")+11:-12]} </copyright>'
 
 			# Remove superfluous commas from keywords if applicable
-			elif (lines[i].strip().startswith("<keyword") and
-				  lines[i].strip().endswith("</keyword>")):
+			elif xml.get_tag(lines[i]) == 'keyword':
 				lines[i] = lines[i].replace(",;", ";")
 
 			# Replace the id in the index tag with the appropriate value
-			elif (lines[i].strip().startswith("<index>") and
-				  lines[i].strip().endswith("</index>")):
-				lines[i] = set_index_id(filename, lines[i])
+			elif xml.get_tag(lines[i]) == 'index':
+				lines[i] = update_index(lines[i], 'i', filename[0:-4])
 
 		# Join list of lines on newline char
 		body = "\n".join(lines)
