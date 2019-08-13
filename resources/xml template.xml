@@ -1,0 +1,13 @@
+<article id="jjxxxxx" lang="en" content="pdf" volume="#" number="#" month="#" year="yyyy" pages="###-###" version="xml" accepted-date="" bioline-date="yyyymmdd" type="AA">
+  <author seq="1">last, first</author>
+  <authors seq="1">
+    <lastname>last</lastname>
+    <firstname>first</firstname>
+  </authors>
+  <!-- Increase seq by 1 for each additional author -->
+  <title lang="en"></title>
+  <abstract lang="en"></abstract>
+  <keyword lang="en"></keyword>
+  <index>yyyy JOURNAL V#N# jjxxxxx</index>
+  <copyright></copyright>
+</article>
