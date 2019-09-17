@@ -1,5 +1,10 @@
 # Bioline Preprocessor
-The Bioline Preprocessor performs a preprocessing of XML files used to display information at [Bioline International](http://www.bioline.org.br/). It fills in information that would previously have to be manually entered by a "processing student" much more efficiently and with less errors.
+The *Bioline Preprocessor* performs a preprocessing of XML files used to display abstracts at [Bioline International](http://www.bioline.org.br/). It fills in information that would previously have to be manually entered by a "Processing Student" while simultaneously correcting common errors from the submission process.
+
+## Usage
+1. Open a terminal and navigate to the folder containing `preprocess.py` (and all the other project files)
+2. Enter: `python preprocess.py`
+![C:\bioline-preprocessor>python preprocess.py](media/1.gif)
 
 ## Actions Performed
 Upon running the script, the following actions will be performed to each XML file in the directory specified by the user:
