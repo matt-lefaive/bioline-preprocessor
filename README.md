@@ -18,4 +18,4 @@ Arg | Description
 `-p <PATH>`, `--path <PATH>` | Specify the path to the XML folder containing files to be preprocessed.
 
 ## Bulk Preprocessing
-Use `python bulk-process.py -f <FILE>` to preprocess multiple issues at the same time. The `<FILE>` argument must point to a text file containing a list of complete paths to XML folders (as per `<PATH>` above), which each path written on it's own line.
+Use `python bulk-process.py -f <FILE>` to preprocess multiple issues at the same time. The `<FILE>` argument must point to a text file containing a list of complete paths to XML folders (as per `<PATH>` above), where each path is written on its own line.
