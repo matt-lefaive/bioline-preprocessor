@@ -1,5 +1,7 @@
 import os
 import re
+import sys
+import getopt
 from typing import List, Dict, Tuple, Union, Optional
 from species_link import insertSpeciesLinks
 from colours import colours
@@ -8,11 +10,14 @@ from xml import xml
 # Constants
 YESNO = f'({colours.GREEN}y{colours.ENDC}/{colours.RED}n{colours.ENDC})'
 
-# Global variables. inf prefixe stands for 'inferred'
+# Global variables. 
+# Journal Issue information. inf prefixe stands for 'inferred'
 inf_year = ""
 inf_volume = ""
 inf_number = ""
 inf_journal_code = ""
+
+
 
 
 def remove_NA_authors(lines: List[str]) -> None:
@@ -320,7 +325,7 @@ def extract_implicit_info(path: str) -> Tuple[str, str, str, str]:
 
 def bval(b: str) -> bool:
 	'''
-	Converts a string to boolean with custom truth-words
+	Converts a string to boolean with custom True-words
 
 	:param b: string to be made into a bool
 	:returns: truth value of the string passed in
@@ -377,8 +382,27 @@ def get_input(message: str, input_type: str) -> Union[str, int, bool]:
 
 
 # MAIN CODE #
-# Get the file path of the /xml folder and appropriately format it
-filepath = get_input("Enter path to xml folder to process: ", 's').replace('\\', '/')
+# Handle command line arguments
+DEBUG = False
+PATH = None
+
+try:
+	opts, args = getopt.getopt(sys.argv[1:], 'p:d', ['path=', 'debug'])
+except getopt.GetoptError:
+	print('GetoptError')
+	exit(3)
+
+for opt, arg in opts:
+	if opt in ('-p', '--path'):
+		PATH = arg.replace('\\', '/')
+	if opt in ('-d', '--debug'):
+		DEBUG = True
+
+
+# Get the file path of the xml folder and appropriately format it
+filepath = PATH
+if (filepath == None):
+	filepath = get_input("Enter path to xml folder to process: ", 's').replace('\\', '/')
 if not filepath.endswith("/"):
 	filepath += "/"
 
@@ -386,7 +410,7 @@ if not filepath.endswith("/"):
 if not re.match(r'.*\/[a-z]{2}\d+\(.+\)\/xml\/$', filepath):
 	print(f"{colours.RED}FILEPATH FORMAT ERROR (ERR 002):{colours.ENDC}" + \
 		" Filepath should end with /jjvv(n)/xml (regex .*\/[a-z]{2}\d+\(.+\)\/xml\/$)")
-	exit()
+	exit(2)
 
 # Determine volume, year, issue, and number based on the path to the xml folder
 (inf_volume, inf_number, inf_year, inf_journal_code) = extract_implicit_info(filepath)
@@ -399,6 +423,7 @@ after_newline_count = 0
 boldHeaders = False
 italicHeaders = False
 speciesLinks = False
+split_keywords = True
 
 try:
 	# Read in the data from the config file if it exists
@@ -421,9 +446,11 @@ try:
 			italicHeaders = bval(tokens[1])
 		elif tokens[0] == 'SPECIESLINKS':
 			speciesLinks = bval(tokens[1])
+		elif tokens[0] == 'SPLITKEYWORDS':
+			split_keywords = bval(tokens[1])
 		elif len(tokens[0]) > 0: #UNKNOWN TOKEN
 			print(f'{colours.RED}UNKNOWN TOKEN (ERR 001):{colours.ENDC}: Unknown token \'{tokens[0]}\' in file \'{inf_journal_code}.config\'')
-			exit()
+			exit(1)
 
 except FileNotFoundError:
 	# Manually retrieve config values from user
@@ -439,6 +466,7 @@ except FileNotFoundError:
 	boldHeaders = get_input(f"Bold abstract headers? {YESNO}: ", 'b')
 	italicHeaders = get_input(f"Italic abstract headers? {YESNO}: ", 'b')
 	speciesLinks = get_input(f"Attempt to automatically insert species links? {YESNO}: ", 'b')
+	split_keywords = get_input(f"Keywords uploaded as comma-delimited strings? {YESNO}: ", 'b')
 	
 	# Save configuration for later reuse if desired
 	save = get_input(f'Save this configuration for {inf_journal_code}? {YESNO}: ', 's')
@@ -450,7 +478,8 @@ except FileNotFoundError:
 			'NEWLINESAFTER': after_newline_count,
 			'BOLD': boldHeaders,
 			'ITALIC': italicHeaders,
-			'SPECIESLINKS': speciesLinks
+			'SPECIESLINKS': speciesLinks,
+			'SPLITKEYWORDS': split_keywords
 		}
 		save_config(config)
 		print(f'{colours.GREEN}Configuration saved!{colours.ENDC}\n')
@@ -510,6 +539,8 @@ for filename in os.listdir(filepath):
 			# Remove superfluous commas from keywords if applicable
 			elif xml.get_tag(lines[i]) == 'keyword':
 				lines[i] = lines[i].replace(",;", ";")
+				if split_keywords:
+					lines[i] = lines[i].replace(',', ';')
 
 			# Replace the id in the index tag with the appropriate value
 			elif xml.get_tag(lines[i]) == 'index':
@@ -536,10 +567,14 @@ for filename in os.listdir(filepath):
 		if speciesLinks:
 			body = insertSpeciesLinks(body)
 
-		# Write processed lines back to the file
-		f = open(filepath + filename, "w")
-		f.write(body)
-		f.close()
+		# If we're in debug mode, print lines to console. 
+		if DEBUG:
+			print(f'------------------------------\n{body}\n------------------------------')
+		else:
+			# Otherwise, write processed lines back to file
+			f = open(filepath + filename, "w")
+			f.write(body)
+			f.close()
 
 print(f"{colours.GREEN}Completed XML processing!{colours.ENDC}")
 print(f"\n{colours.YELLOW}Generating proofing file{colours.ENDC}")
@@ -547,10 +582,15 @@ write_problems_file(filepath + "../" + inf_journal_code + inf_volume + "(" +
 					inf_number + ") Problems.txt", file_to_volume)
 print(f"{colours.GREEN}Proofing file generated!{colours.ENDC}")
 
+
+# Exit at this stage if in debug mode
+if DEBUG:
+	exit(0)
+
 print(f"\n{colours.YELLOW}Performing Discrepancy Analysis{colours.ENDC}")
 
 # Fix any problems with volume numbers (if so desired by user)
-confirmation = f"    Would you like to automatically fix these problems? {YESNO}: "
+confirmation = f"Would you like to automatically fix these problems? {YESNO}: "
 
 if exists_discrepencies(file_to_volume, inf_volume):
 	problems = print_discrepancy_report(file_to_volume, "volume")
