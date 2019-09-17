@@ -7,6 +7,7 @@ The *Bioline Preprocessor* performs a preprocessing of XML files used to display
 ![C:\bioline-preprocessor>python preprocess.py](media/1.gif)
 
 ## Command-Line Args
+Arg | Description
 --- | ---
 `-d`, `--debug` | Turns on debug mode. Preprocessed XML files will be printed to `stdout` instead of being overwritten
 `-p`, `--path <PATH>` | [OPTIONAL] Specify the path to the XML folder containing files to be preprocessed.
