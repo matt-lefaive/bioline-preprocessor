@@ -6,6 +6,10 @@ The *Bioline Preprocessor* performs a preprocessing of XML files used to display
 2. Enter: `python preprocess.py` and, when prompted, paste the path to the folder containing XML files to be preprocessed.  
 ![C:\bioline-preprocessor>python preprocess.py](media/1.gif)
 
+## Command-Line Args
+`-d`, `--debug` | Turns on debug mode. Preprocessed XML files will be printed to `stdout` instead of being overwritten
+`-p`, `--path <PATH>` | [OPTIONAL] Specify the path to the XML folder containing files to be preprocessed.
+
 ## Actions Performed
 Upon running the script, the following actions will be performed to each XML file in the directory specified by the user:
 * Article id will be correctly set in `article` and `index` tags
