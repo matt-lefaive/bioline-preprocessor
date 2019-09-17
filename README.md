@@ -3,7 +3,7 @@ The *Bioline Preprocessor* performs a preprocessing of XML files used to display
 
 ## Usage
 1. Open a terminal and navigate to the folder containing `preprocess.py` (and all the other project files)
-2. Enter: `python preprocess.py`
+2. Enter: `python preprocess.py` and, when prompted, paste the path to the folder containing XML files to be preprocessed.  
 ![C:\bioline-preprocessor>python preprocess.py](media/1.gif)
 
 ## Actions Performed
