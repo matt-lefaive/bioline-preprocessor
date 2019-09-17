@@ -2,8 +2,7 @@ import sys, getopt, os
 import subprocess
 from colours import colours
 
-def second_last(s: str, o: str) -> int:
-	return s[:s.rfind(o)].rfind(o)
+second_last = lambda s, o: s[:s.rfind(o)].rfind(o)
 
 # Get command-line args
 PATH = None
